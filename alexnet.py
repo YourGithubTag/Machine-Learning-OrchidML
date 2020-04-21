@@ -6,11 +6,12 @@ import zipfile
 running_on_google_colab = False
 
 if running_on_google_colab:
-   file_path = '/flower_data.zip'
-   extract_to = ''
-else:
    file_path = '/content/flower_data.zip'
    extract_to = '/content'
+else:
+   file_path = './flower_data.zip'
+   extract_to = './'
+   
 ################################################
 
 # Data Files and Labels
