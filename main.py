@@ -1,7 +1,7 @@
 # Tools
 import os
 import wget
-import zipfile
+import shutil
 # PyTorch
 import torch
 import torch.optim as optim
@@ -19,25 +19,22 @@ from model.alexnet import AlexNet
 #---------------- GOOGLE COLAB ----------------#
 
 running_on_google_colab = False
-files_downloaded = True
+files_downloaded = False
 
 if running_on_google_colab:
-   file_path = '/content/flower_data.zip'
-   extract_to = '/content'
+   file_path = '/content/flower_data.tar.gz'
+   extract_to = '/content/flower_data'
 else:
-   file_path = '../flower_data.zip'
-   extract_to = '../'
-
+   file_path = './flower_data.tar.gz'
+   extract_to = './flower_data'
 
 #---------------- DOWNLOAD DATA ----------------#
 
 if not files_downloaded:
-   wget.download('https://s3.amazonaws.com/content.udacity-data.com/courses/nd188/flower_data.zip', '../')
-   wget.download('https://raw.githubusercontent.com/udacity/pytorch_challenge/master/cat_to_name.json', '../')
-   with zipfile.ZipFile(file_path, 'r') as zip_ref:
-      zip_ref.extractall(extract_to)
+   wget.download('https://s3.amazonaws.com/content.udacity-data.com/nd089/flower_data.tar.gz')
+   wget.download('https://raw.githubusercontent.com/udacity/pytorch_challenge/master/cat_to_name.json')
+   shutil.unpack_archive(file_path, extract_to)
    os.remove(file_path)
-
 
 #---------------- SAVE IMAGE JPG ----------------#
 
@@ -48,12 +45,9 @@ def imsave(img):
     im = Image.fromarray(npimg)
     im.save("./results/your_file.jpeg")
 
-
 #------------- DEFINING TRANSFORMS --------------#
 
-data_transforms = {}
-
-data_transforms['train'] = transforms.Compose([
+train_transform = transforms.Compose([
    # Selects a random transform from the list and applies it respective
    # of its corresponding probability.
    transforms.RandomChoice([
@@ -65,10 +59,12 @@ data_transforms['train'] = transforms.Compose([
    transforms.RandomResizedCrop(256),
    # Converts to Tensor.
    transforms.ToTensor(),
+   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
    ])
 
-data_transforms['validate'] = transforms.Compose([
+validate_test_transform = transforms.Compose([
    # Crops image to 256x256 from centre.
    transforms.CenterCrop(256),
    transforms.ToTensor(),
+   transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
    ])
