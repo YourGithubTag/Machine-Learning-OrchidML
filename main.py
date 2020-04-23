@@ -71,8 +71,8 @@ def main():
    print(f'Device selected: {str(device).upper()}')
 
    # GOOGLE COLAB
-   running_on_google_colab = True
-   files_downloaded = False
+   running_on_google_colab = False
+   files_downloaded = True
 
    if running_on_google_colab:
       file_path = '/content/flower_data.tar.gz'
@@ -101,16 +101,17 @@ def main():
          transforms.RandomVerticalFlip(p=0.5),
          transforms.RandomRotation(180),
          ]),
-      # Crops image to 256x256.
-      transforms.RandomResizedCrop(256),
+      # Crops image to 227x227.
+      transforms.Resize(256),
+      transforms.RandomResizedCrop(227),
       # Converts to Tensor.
       transforms.ToTensor(),
       transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
       ])
 
    validate_test_transform = transforms.Compose([
-      # Crops image to 256x256 from centre.
-      transforms.CenterCrop(256),
+      # Crops image to 227x227 from centre.
+      transforms.CenterCrop(227),
       transforms.ToTensor(),
       transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
       ])
@@ -125,7 +126,8 @@ def main():
    validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=419, shuffle=False)
    test_loader = torch.utils.data.DataLoader(test_data, batch_size=273, shuffle=False)
 
-   model = AlexNet().to(device)
+   # model = AlexNet().to(device)
+   model = torch.hub.load('pytorch/vision:v0.6.0', 'alexnet', pretrained=False).to(device)
 
    optimizer = optim.Adam(model.classifier.parameters(), lr=0.001)
    #scheduler = StepLR(optimizer, step_size=1, gamma=gamma)
