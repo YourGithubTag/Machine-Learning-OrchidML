@@ -1,52 +1,46 @@
-# Tools
+# Module and Model Imports
 import os
 import wget
 import shutil
-# PyTorch
 import torch
 import torch.optim as optim
 import torchvision
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import torch.nn.functional as F
-# Math
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-# Models
 from model.alexnet import AlexNet
 
-#---------------- GOOGLE COLAB ----------------#
-
+# Google Colab.
 running_on_google_colab = False
 files_downloaded = False
 
 if running_on_google_colab:
-   file_path = '/content/flower_data.tar.gz'
-   extract_to = '/content/flower_data'
+   zip = '/content/flower_data.tar.gz'
+   data = '/content/flower_data'
 else:
-   file_path = './flower_data.tar.gz'
-   extract_to = './flower_data'
+   zip = './flower_data.tar.gz'
+   data = './flower_data'
 
-#---------------- DOWNLOAD DATA ----------------#
-
+# Downloads the Dataset.
 if not files_downloaded:
    wget.download('https://s3.amazonaws.com/content.udacity-data.com/nd089/flower_data.tar.gz')
    wget.download('https://raw.githubusercontent.com/udacity/pytorch_challenge/master/cat_to_name.json')
-   shutil.unpack_archive(file_path, extract_to)
-   os.remove(file_path)
+   shutil.unpack_archive(zip, data)
+   os.remove(zip)
 
-#---------------- SAVE IMAGE JPG ----------------#
-
-# Adapted from Example Code - Takes Tensors and converts to RGB image.
+# Function: Saves Tensor as Image.
+   # Update comments later.
+   # Adapted from Example Code - Takes Tensors and converts to RGB image.
 def imsave(img):
     npimg = img.numpy()
     npimg = (np.transpose(npimg, (1, 2, 0)) * 255).astype(np.uint8)
     im = Image.fromarray(npimg)
     im.save("./results/your_file.jpeg")
 
-#------------- DEFINING TRANSFORMS --------------#
-
+# Transform definitions for Train, Validate and Test.
 train_transform = transforms.Compose([
    # Selects a random transform from the list and applies it respective
    # of its corresponding probability.
@@ -68,3 +62,8 @@ validate_test_transform = transforms.Compose([
    transforms.ToTensor(),
    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
    ])
+
+# Prepares and Loads Training, Validation and Testing Data.
+train_data = datasets.ImageFolder(data+'/train', transform=train_transform)
+validate_data = datasets.ImageFolder(data+'/valid', transform=validate_test_transform)
+test_data = datasets.ImageFolder(data+'/test', transform=validate_test_transform)
