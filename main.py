@@ -1,20 +1,17 @@
-# Tools
+# Module and Model Imports
 import os
 import json
 import wget
 import shutil
-# PyTorch
 import torch
 import torch.optim as optim
 import torchvision
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 import torch.nn.functional as F
-# Math
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-# Models
 from model.alexnet import AlexNet
 
 # Adapted from Example Code - Takes Tensors and converts to RGB image.
@@ -94,6 +91,11 @@ def main():
       transforms.ToTensor(),
       transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
       ])
+
+   # Prepares and Loads Training, Validation and Testing Data.
+   train_data = datasets.ImageFolder(data+'/train', transform=train_transform)
+   validate_data = datasets.ImageFolder(data+'/valid', transform=validate_test_transform)
+   test_data = datasets.ImageFolder(data+'/test', transform=validate_test_transform)
 
    # MAPPING CATEGORY LABELS
    with open('./cat_to_name.json', 'r') as ctn:
