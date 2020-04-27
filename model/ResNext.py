@@ -15,7 +15,7 @@ def conv1x1(in_planes, out_planes, stride=1):
 
 
 
-
+#Need to fix the i/o
 class bottleneck(nn.Module):
         def __init__(self,inplanes, planes, stride=1, downsample=None,groups=1, base_width=64, dilation=1, norm_layer=None):
             super(Bottleneck, self).__init__()
@@ -67,8 +67,7 @@ class ResNext(nn.Module):
         self.inplanes = 64
         self.dilation = 1
         if replace_stride_with_dilation is None:
-            # each element in the tuple indicates if we should replace
-            # the 2x2 stride with a dilated convolution instead
+           
             replace_stride_with_dilation = [False, False, False]
         if len(replace_stride_with_dilation) != 3:
             raise ValueError("replace_stride_with_dilation should be None "
@@ -99,7 +98,6 @@ class ResNext(nn.Module):
 
         # Zero-initialize the last BN in each residual branch,
         # so that the residual branch starts with zeros, and each residual block behaves like an identity.
-        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
         if zero_init_residual:
             for m in self.modules():
                 if isinstance(m, Bottleneck):
@@ -152,27 +150,3 @@ class ResNext(nn.Module):
     def forward(self, x):
         return self._forward_impl(x)
     
-    def resnext50_32x4d(pretrained=False, progress=True, **kwargs):
-    r"""ResNeXt-50 32x4d model from
-    `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    kwargs['groups'] = 32
-    kwargs['width_per_group'] = 4
-    return _resnet('resnext50_32x4d', Bottleneck, [3, 4, 6, 3],
-                   pretrained, progress, **kwargs)
-
-
-    def resnext101_32x8d(pretrained=False, progress=True, **kwargs):
-        r"""ResNeXt-101 32x8d model from
-        `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
-        Args:
-            pretrained (bool): If True, returns a model pre-trained on ImageNet
-            progress (bool): If True, displays a progress bar of the download to stderr
-        """
-        kwargs['groups'] = 32
-        kwargs['width_per_group'] = 8
-        return _resnet('resnext101_32x8d', Bottleneck, [3, 4, 23, 3],
-                    pretrained, progress, **kwargs)
