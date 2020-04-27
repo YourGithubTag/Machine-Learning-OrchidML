@@ -29,7 +29,7 @@ class AlexNet(nn.Module):
          nn.Dropout(),
          nn.Linear(4096, 4096),
          nn.ReLU(),
-         nn.Linear(4096, 102)
+         nn.Linear(4096, 17)
       )
 
    # Since this NN is inheriting the nn.Module, it will have forward() and backward() methods.
