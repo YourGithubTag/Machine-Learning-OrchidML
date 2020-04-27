@@ -13,20 +13,26 @@ from torch.optim.lr_scheduler import StepLR
 from models.alexnet import AlexNet
 from helpers.helpers import *
 
+
+#-----------------------------------Network Functions-----------------------------------#
+
 def train(model, device, train_loader, validate_loader, optimizer, epoch):
    model.train()
+   loss_value = 0
    for index, (inputs, labels) in enumerate(train_loader):
       # inputs = batch of samples (64) || index = batch index (1)
       inputs, labels = inputs.to(device), labels.to(device)
       optimizer.zero_grad()
       output = model(inputs)
       loss = F.cross_entropy(output, labels)
+      loss_value += loss.item()
       loss.backward()
       optimizer.step()
 
-      print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-         epoch, index*len(inputs), len(train_loader.dataset), 
-         100. * index / len(train_loader), loss.item()))
+      if index == 16:
+        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.6f}'.format(
+          epoch, index*len(inputs), len(train_loader.dataset), 
+          100. * index / len(train_loader), loss_value / len(train_loader)))
 
 def evaluate(model, device, evaluate_loader, valid):
    model.eval()
@@ -53,8 +59,10 @@ def evaluate(model, device, evaluate_loader, valid):
 
    return loss
 
+#--------------------------------------Main Function--------------------------------------#
+
 def main():
-   epochs = 14
+   epochs = 200
    best_valid_loss = float('inf')
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -122,9 +130,11 @@ def main():
    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
    print(f'Device selected: {str(device).upper()}')
-   print(f'Number of training samples: {len(train_data)}')
+   print(f'\nNumber of training samples: {len(train_data)}')
    print(f'Number of validation samples: {len(validate_data)}')
    print(f'Number of testing samples: {len(test_data)}')
+
+   #----------------------------------Training the Network----------------------------------#
 
    for epoch in range(1, epochs+1):
       train(model, device, train_loader, validate_loader, optimizer, epoch)
@@ -133,6 +143,12 @@ def main():
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
          torch.save(model.state_dict(), 'alexnet-model.pt')
+         print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
+
+   #-----------------------------------Testing the Network-----------------------------------#
+
+   model.load_state_dict(torch.load('alexnet-model.pt'))
+   evaluate(model, device, test_loader, 0)
 
 if __name__ == '__main__':
    main()
