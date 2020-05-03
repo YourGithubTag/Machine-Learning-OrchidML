@@ -8,8 +8,7 @@ import torchvision
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-
-from models.ResNext import ResNext
+from model.ResNext import resnext50_32x4d
 from helpers.helpers import *
 
 #-----------------------------------Network Functions-----------------------------------#
@@ -74,8 +73,8 @@ def main():
       extract_to = '/content/flower_data'
    else:
       file_path = './17Flowers.zip'
-      extract_to = '../flower_data'
-      shutil.unpack_archive(file_path, extract_to)
+      extract_to = './flower_data'
+      #shutil.unpack_archive(file_path, extract_to)
       print('extracted.')
 
    if not files_downloaded:
@@ -112,38 +111,40 @@ def main():
    test_data = datasets.ImageFolder(extract_to+'/test', transform=validate_test_transform)
 
    # Defining the Dataloaders using Datasets.
-   train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)  # 1,088.
-   validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=136)         # 136.
-   test_loader = torch.utils.data.DataLoader(test_data, batch_size=136)                 # 136.
+   train_loader = torch.utils.data.DataLoader(train_data, batch_size=30, shuffle=True)  # 1,088.
+   validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=30)         # 136.
+   test_loader = torch.utils.data.DataLoader(test_data, batch_size=30)                 # 136.
 
    #---------------------------------Plots Training Images---------------------------------#
-   
+   '''
    N_IMAGES = 25
    images, labels = zip(*[(image, label) for image, label in 
                               [train_data[i] for i in range(N_IMAGES)]])
    labels = [test_data.classes[i] for i in labels]
    plot_images(images, labels, normalize = True)
+   '''
 
    #---------------------------------Setting up the Network---------------------------------#
    
-   model = resnext101_32x8d().to(device)
+   model = resnext50_32x4d().to(device)
    optimizer = optim.Adam(model.parameters(), lr=0.001)
-
+   
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
    print(f'Number of validation samples: {len(validate_data)}')
    print(f'Number of testing samples: {len(test_data)}')
 
    #----------------------------------Training the Network----------------------------------#
-
+   valid_loss = 1
    for epoch in range(1, epochs+1):
       train(model, device, train_loader, validate_loader, optimizer, epoch)
       valid_loss = evaluate(model, device, validate_loader, 1)
-
+      
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
          torch.save(model.state_dict(), 'ResNext-model.pt')
          print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
+         
 
    #-----------------------------------Testing the Network-----------------------------------#
 
