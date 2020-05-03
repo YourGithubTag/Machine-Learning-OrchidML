@@ -1,14 +1,12 @@
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-# from sklearn import decomposition
-# from sklearn import manifold
+from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
 def get_predictions(model, iterator, device):
     model.eval()
-
     images = []; labels = []; probs = []
 
     with torch.no_grad():
@@ -35,5 +33,15 @@ def plot_confusion_matrix(labels, pred_labels, classes):
     ax = fig.add_subplot(1, 1, 1)
     cm = confusion_matrix(labels, pred_labels)
     cm = ConfusionMatrixDisplay(cm, classes)
-    cm.plot(values_format = 'd', cmap = 'Blues', ax = ax)
+    cm.plot(values_format = 'd', cmap = 'Greens', ax = ax)
     plt.xticks(rotation = 20)
+    plt.show()
+
+def class_report(pred_labels, data, dp):
+
+    t_images, t_labels = zip(*[(image, label) for image, label in
+                               [data[i] for i in range(len(data))]]) 
+    t_labels = [i for i in t_labels]
+
+    # list of correct labels, list of predicted labels, dps.
+    print(metrics.classification_report(t_labels, pred_labels, digits=dp))
