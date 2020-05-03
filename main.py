@@ -3,6 +3,7 @@ import os
 import json
 import wget
 import shutil
+
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -53,7 +54,7 @@ def evaluate(model, device, evaluate_loader, valid):
    else:
       word = 'Test'
 
-   print('\n{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+   print('{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
          word, loss, accuracy, len(evaluate_loader.dataset),
          100. * accuracy / len(evaluate_loader.dataset)))
 
@@ -116,7 +117,7 @@ def main():
    validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=136)         # 136.
    test_loader = torch.utils.data.DataLoader(test_data, batch_size=136)                 # 136.
 
-   # Converts labels from JSON file
+   # Compile labels into a list from JSON file.
    with open('cat_to_name.json', 'r') as f:
       cat_to_name = json.load(f)
 
@@ -124,40 +125,39 @@ def main():
    for label in cat_to_name:
       species.append(cat_to_name[label])
 
-   #---------------------------------Plots Training Images---------------------------------#
+   #---------------------------------Plots Testing Images---------------------------------#
    
-   N_IMAGES = 135
-   p_images, p_labels = zip(*[(image, label) for image, label in 
-                              [test_data[i] for i in range(N_IMAGES)]])
+   # t_images, t_labels = zip(*[(image, label) for image, label in 
+   #                            [test_data[i] for i in range(len(test_data))]])
    
-   p_labels = [species[i] for i in p_labels]
-   plot_images(p_images, p_labels, normalize = True)
+   # t_labels = [species[i] for i in t_labels]
+   # plot_images(t_images, t_labels, normalize = True)
 
    #---------------------------------Setting up the Network---------------------------------#
    
    model = AlexNet().to(device)
-   # optimizer = optim.Adam(model.parameters(), lr=0.001)
+   optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-   # print(f'Device selected: {str(device).upper()}')
-   # print(f'\nNumber of training samples: {len(train_data)}')
-   # print(f'Number of validation samples: {len(validate_data)}')
-   # print(f'Number of testing samples: {len(test_data)}')
+   print(f'Device selected: {str(device).upper()}')
+   print(f'\nNumber of training samples: {len(train_data)}')
+   print(f'Number of validation samples: {len(validate_data)}')
+   print(f'Number of testing samples: {len(test_data)}')
 
    #----------------------------------Training the Network----------------------------------#
 
-   # for epoch in range(1, epochs+1):
-   #    train(model, device, train_loader, validate_loader, optimizer, epoch)
-   #    valid_loss = evaluate(model, device, validate_loader, 1)
+   for epoch in range(1, epochs+1):
+      train(model, device, train_loader, validate_loader, optimizer, epoch)
+      valid_loss = evaluate(model, device, validate_loader, 1)
 
-   #    if valid_loss < best_valid_loss:
-   #       best_valid_loss = valid_loss
-   #       torch.save(model.state_dict(), 'alexnet-model.pt')
-   #       print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
+      if valid_loss < best_valid_loss:
+         best_valid_loss = valid_loss
+         torch.save(model.state_dict(), 'alexnet-model.pt')
+         print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
 
    #-----------------------------------Testing the Network-----------------------------------#
 
-   # model.load_state_dict(torch.load('alexnet-model.pt', map_location=torch.device('cpu')))
-   # evaluate(model, device, test_loader, 0)
+   model.load_state_dict(torch.load('alexnet-model.pt')) #, map_location=torch.device('cpu')))
+   evaluate(model, device, test_loader, 0)
 
    #---------------------------------Examination of Results----------------------------------#
 
@@ -165,11 +165,8 @@ def main():
    images, labels, probs = get_predictions(model, test_loader, device)
    predicted_labels = torch.argmax(probs, 1)
 
-   print(labels)
-   print(probs)
-   print(predicted_labels)
-   
-   plot_confusion_matrix(labels, predicted_labels, species) 
+   plot_confusion_matrix(labels, predicted_labels, species)
+   class_report(predicted_labels, test_data, 3)
 
 if __name__ == '__main__':
    main()
