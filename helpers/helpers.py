@@ -19,10 +19,5 @@ def plot_images(images, labels, normalize = False):
         ax.imshow(image.permute(1, 2, 0).cpu().numpy())
         ax.set_title(labels[i])
         ax.axis('off')
-
-# Adapted from Example Code - Takes Tensors and converts to RGB image.
-def imsave(img):
-   npimg = img.numpy()
-   npimg = (np.transpose(npimg, (1, 2, 0)) * 255).astype(np.uint8)
-   im = Image.fromarray(npimg)
-   im.save("./results/your_file.jpeg")
+    
+    plt.show()
