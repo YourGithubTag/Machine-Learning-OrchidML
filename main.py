@@ -67,7 +67,7 @@ def evaluate(model, device, evaluate_loader, valid):
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
-   epochs = 2
+   epochs = 10
    best_valid_loss = float('inf')
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
    # accuracy and loss graphing
@@ -79,7 +79,7 @@ def main():
    #-----------------------------------Dataset Download-----------------------------------#
 
    running_on_google_colab = False
-   files_downloaded = False
+   files_downloaded = True
 
    if running_on_google_colab:
       file_path = '/content/17Flowers.zip'
@@ -145,8 +145,9 @@ def main():
    #---------------------------------Setting up the Network---------------------------------#
    
    #  model = AlexNet().to(device)
-   model = vgg16_bn().to(device)
-   optimizer = optim.Adam(model.parameters(), lr=0.001)
+   model = VGG16().to(device)
+   # optimizer = optim.Adam(model.parameters(), lr=0.001)
+   optimizer = optim.SGD(model.parameters(), lr=0.001)
 
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
@@ -171,7 +172,7 @@ def main():
          print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
 
    #----------------------------------Accuracy/Loss Graphs----------------------------------#
-
+   
    plot_graphs_csv(x_epochs, y_train_loss, ['Train Loss'])
    plot_graphs_csv(x_epochs, y_valid_acc, ['Validate Accuracy'])
    plot_graphs_csv(x_epochs, y_valid_loss, ['Validate Loss'])
@@ -179,10 +180,10 @@ def main():
    plot_graphs_csv(x_epochs, y_test_loss, ['Test Loss'])
 
    #-----------------------------------Testing the Network-----------------------------------#
-   
-   '''
-   model.load_state_dict(torch.load('alexnet-model.pt')) #, map_location=torch.device('cpu')))
+
+   #  model.load_state_dict(torch.load('alexnet-model.pt'))
    model.load_state_dict(torch.load('vgg-model.pt'))
+   
    _, _ = evaluate(model, device, test_loader, 0)
 
    #---------------------------------Examination of Results----------------------------------#
@@ -193,7 +194,6 @@ def main():
 
    plot_confusion_matrix(labels, predicted_labels, species)
    class_report(predicted_labels, test_data, 3)
-   '''
 
 if __name__ == '__main__':
    main()
