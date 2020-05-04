@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 from PIL import Image
 
 def plot_images(images, labels, normalize = False):
@@ -21,3 +22,15 @@ def plot_images(images, labels, normalize = False):
         ax.axis('off')
     
     plt.show()
+
+def plot_graphs_csv(x, y, y_label):
+    plt.figure()
+    plt.plot(x, y)
+    plt.xlabel('Epoch')
+    plt.ylabel(y_label)
+
+    with open('Results.csv', 'a+', newline='') as file:
+        wr = csv.writer(file)
+        wr.writerow(y_label)
+        wr.writerow(x)
+        wr.writerow(y)
