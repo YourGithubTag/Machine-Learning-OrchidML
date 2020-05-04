@@ -8,7 +8,7 @@ import torchvision
 from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
-from model.ResNext import resnext50_32x4d
+from model.inception import Inception3
 from helpers.helpers import *
 
 #-----------------------------------Network Functions-----------------------------------#
@@ -126,7 +126,7 @@ def main():
 
    #---------------------------------Setting up the Network---------------------------------#
    
-   model = resnext50_32x4d().to(device)
+   model = Inception3().to(device)
    optimizer = optim.Adam(model.parameters(), lr=0.001)
    
    print(f'Device selected: {str(device).upper()}')
@@ -135,20 +135,20 @@ def main():
    print(f'Number of testing samples: {len(test_data)}')
 
    #----------------------------------Training the Network----------------------------------#
-   valid_loss = 1
+   """
    for epoch in range(1, epochs+1):
       train(model, device, train_loader, validate_loader, optimizer, epoch)
       valid_loss = evaluate(model, device, validate_loader, 1)
       
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
-         torch.save(model.state_dict(), 'ResNext-model.pt')
+         torch.save(model.state_dict(), 'inceptionv3-model.pt')
          print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
          
-
+   """	
    #-----------------------------------Testing the Network-----------------------------------#
 
-   model.load_state_dict(torch.load('ResNext-model.pt'))
+   model.load_state_dict(torch.load('inceptionv3-model.pt'))
    evaluate(model, device, test_loader, 0)
 
 if __name__ == '__main__':
