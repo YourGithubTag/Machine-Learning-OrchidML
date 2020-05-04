@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class VGG16(nn.Module):
 
-    def __init__(self, features, init_weights=True):
+    def __init__(self, init_weights=True):
         super(VGG16, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
