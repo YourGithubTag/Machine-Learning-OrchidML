@@ -11,6 +11,7 @@ import torchvision
 from torchvision import datasets, transforms
 
 from models.alexnet import AlexNet
+from models.vgg import *
 from helpers.helpers import *
 from helpers.examination import *
 
@@ -31,9 +32,12 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
       optimizer.step()
 
       if index == 16:
-        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.6f}'.format(
+        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}'.format(
           epoch, index*len(inputs), len(train_loader.dataset), 
           100. * index / len(train_loader), loss_value / len(train_loader)))
+        
+   return (loss_value / len(train_loader))
+        
 
 def evaluate(model, device, evaluate_loader, valid):
    model.eval()
@@ -58,19 +62,24 @@ def evaluate(model, device, evaluate_loader, valid):
          word, loss, accuracy, len(evaluate_loader.dataset),
          100. * accuracy / len(evaluate_loader.dataset)))
 
-   return loss
+   return loss, (100. * accuracy / len(evaluate_loader.dataset)) # returns loss and accuracy in %.
 
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
-   epochs = 200
+   epochs = 2
    best_valid_loss = float('inf')
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+   # accuracy and loss graphing
+   x_epochs = list(range(1, epochs+1))
+   y_train_loss = []
+   y_valid_acc = []; y_valid_loss = []
+   y_test_acc = []; y_test_loss = []
 
    #-----------------------------------Dataset Download-----------------------------------#
 
    running_on_google_colab = False
-   files_downloaded = True
+   files_downloaded = False
 
    if running_on_google_colab:
       file_path = '/content/17Flowers.zip'
@@ -114,8 +123,8 @@ def main():
 
    # Defining the Dataloaders using Datasets.
    train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)  # 1,088.
-   validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=136)         # 136.
-   test_loader = torch.utils.data.DataLoader(test_data, batch_size=136)                 # 136.
+   validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=136)         # 136 AlexNet
+   test_loader = torch.utils.data.DataLoader(test_data, batch_size=136)                 
 
    # Compile labels into a list from JSON file.
    with open('cat_to_name.json', 'r') as f:
@@ -135,29 +144,46 @@ def main():
 
    #---------------------------------Setting up the Network---------------------------------#
    
-   model = AlexNet().to(device)
+   #  model = AlexNet().to(device)
+   model = vgg16_bn().to(device)
    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
    print(f'Number of validation samples: {len(validate_data)}')
    print(f'Number of testing samples: {len(test_data)}')
-
+   
    #----------------------------------Training the Network----------------------------------#
-
+  
    for epoch in range(1, epochs+1):
-      train(model, device, train_loader, validate_loader, optimizer, epoch)
-      valid_loss = evaluate(model, device, validate_loader, 1)
+      train_loss = train(model, device, train_loader, validate_loader, optimizer, epoch)
+      valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
+      test_loss, test_acc = evaluate(model, device, test_loader, 0)
+      
+      y_train_loss.append(round(train_loss,3))
+      y_valid_acc.append(round(valid_acc, 0)); y_valid_loss.append(round(valid_loss, 3))
+      y_test_acc.append(round(test_acc, 0)); y_test_loss.append(round(test_loss, 3))
 
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
-         torch.save(model.state_dict(), 'alexnet-model.pt')
+        #  torch.save(model.state_dict(), 'alexnet-model.pt')
+         torch.save(model.state_dict(), 'vgg-model.pt')
          print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
 
-   #-----------------------------------Testing the Network-----------------------------------#
+   #----------------------------------Accuracy/Loss Graphs----------------------------------#
 
+   plot_graphs_csv(x_epochs, y_train_loss, ['Train Loss'])
+   plot_graphs_csv(x_epochs, y_valid_acc, ['Validate Accuracy'])
+   plot_graphs_csv(x_epochs, y_valid_loss, ['Validate Loss'])
+   plot_graphs_csv(x_epochs, y_test_acc, ['Test Accuracy'])
+   plot_graphs_csv(x_epochs, y_test_loss, ['Test Loss'])
+
+   #-----------------------------------Testing the Network-----------------------------------#
+   
+   '''
    model.load_state_dict(torch.load('alexnet-model.pt')) #, map_location=torch.device('cpu')))
-   evaluate(model, device, test_loader, 0)
+   model.load_state_dict(torch.load('vgg-model.pt'))
+   _, _ = evaluate(model, device, test_loader, 0)
 
    #---------------------------------Examination of Results----------------------------------#
 
@@ -167,6 +193,7 @@ def main():
 
    plot_confusion_matrix(labels, predicted_labels, species)
    class_report(predicted_labels, test_data, 3)
+   '''
 
 if __name__ == '__main__':
    main()
