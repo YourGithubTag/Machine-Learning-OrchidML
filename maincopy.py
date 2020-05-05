@@ -57,6 +57,9 @@ def evaluate(model, device, evaluate_loader, valid):
          100. * accuracy / len(evaluate_loader.dataset)))
 
    return loss, (100. * accuracy / len(evaluate_loader.dataset)) # returns loss and accuracy in %.
+   
+def jobSetup():
+   
 
 #--------------------------------------Main Function--------------------------------------#
 
