@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import csv
 from PIL import Image
 
 def plot_images(images, labels, normalize = False):
@@ -19,10 +20,17 @@ def plot_images(images, labels, normalize = False):
         ax.imshow(image.permute(1, 2, 0).cpu().numpy())
         ax.set_title(labels[i])
         ax.axis('off')
+    
+    plt.show()
 
-# Adapted from Example Code - Takes Tensors and converts to RGB image.
-def imsave(img):
-   npimg = img.numpy()
-   npimg = (np.transpose(npimg, (1, 2, 0)) * 255).astype(np.uint8)
-   im = Image.fromarray(npimg)
-   im.save("./results/your_file.jpeg")
+def plot_graphs_csv(x, y, y_label):
+    plt.figure()
+    plt.plot(x, y)
+    plt.xlabel('Epoch')
+    plt.ylabel(y_label)
+
+    with open('Results.csv', 'a+', newline='') as file:
+        wr = csv.writer(file)
+        wr.writerow(y_label)
+        wr.writerow(x)
+        wr.writerow(y)

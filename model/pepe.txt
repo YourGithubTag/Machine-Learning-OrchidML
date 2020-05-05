@@ -1,0 +1,30 @@
+#CHANGED KERNAL SIZE FROM 5 TO 3 WILL CHANGE BACK ONCE UNDERSTOOD HOW TO KEEP LINKS
+class InceptionAux(nn.Module):
+
+    def __init__(self, in_channels, num_classes, conv_block=None):
+        super(InceptionAux, self).__init__()
+        if conv_block is None:
+            conv_block = BasicConv2d
+        self.conv0 = conv_block(in_channels, 128, kernel_size=1)
+        self.conv1 = conv_block(128, 768, kernel_size=3)
+        self.conv1.stddev = 0.01
+        self.fc = nn.Linear(768, num_classes)
+        self.fc.stddev = 0.001
+
+#CHANGED KERNAL SIZE FROM 5 TO 3 WILL CHANGE BACK ONCE UNDERSTOOD HOW TO KEEP LINKS
+    def forward(self, x):
+        # N x 768 x 17 x 17
+        x = F.avg_pool2d(x, kernel_size=3, stride=3)
+        # N x 768 x 5 x 5
+        x = self.conv0(x)
+        # N x 128 x 5 x 5
+        x = self.conv1(x)
+        # N x 768 x 1 x 1
+        # Adaptive average pooling
+        x = F.adaptive_avg_pool2d(x, (1, 1))
+        # N x 768 x 1 x 1
+        x = torch.flatten(x, 1)
+        # N x 768
+        x = self.fc(x)
+        # N x 1000
+        return x
