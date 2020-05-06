@@ -40,9 +40,9 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
       if index == 16:
         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}\tAccuracy: {:.2f}'.format(
           epoch, index*len(inputs), len(train_loader.dataset), 
-          100. * index / len(train_loader), loss_value / len(train_loader), acc_value / len(train_loader)))
+          100. * index / len(train_loader), loss_value / len(train_loader), acc_value / len(train_loader) * 100))
         
-   return (loss_value / len(train_loader)), (acc_value / len(train_loader))
+   return (loss_value / len(train_loader)), (acc_value / len(train_loader) * 100)
         
 
 def evaluate(model, device, evaluate_loader, valid):
