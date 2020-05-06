@@ -10,9 +10,9 @@ import torch.optim as optim
 import torchvision
 from torchvision import datasets, transforms
 
-# from models.alexnet import AlexNet
-# from models.resnet import ResNet18
-# from models.vgg import *
+from models.alexnet import AlexNet
+from models.resnet import ResNet18
+from models.vgg import *
 from models.resnext import ResNext50
 from helpers.helpers import *
 from helpers.examination import *
