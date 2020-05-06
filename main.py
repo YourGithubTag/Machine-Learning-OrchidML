@@ -168,9 +168,9 @@ def main():
       valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
       test_loss, test_acc = evaluate(model, device, test_loader, 0)
       
-      y_train_acc.append(round(train_acc, 0)); y_train_loss.append(round(train_loss, 3))
-      y_valid_acc.append(round(valid_acc, 0)); y_valid_loss.append(round(valid_loss, 3))
-      y_test_acc.append(round(test_acc, 0)); y_test_loss.append(round(test_loss, 3))
+      y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
+      y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
+      y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
 
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
