@@ -154,7 +154,7 @@ def main():
   #  model = ResNet18().to(device)
   #  model = VGG16().to(device)
    model = ResNext50().to(device)
-   optimizer = optim.SGD(model.parameters(), lr=0.001)
+   optimizer = optim.Adam(model.parameters(), lr=0.001)
 
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
@@ -168,7 +168,7 @@ def main():
       valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
       test_loss, test_acc = evaluate(model, device, test_loader, 0)
       
-      y_train_acc.append(round(train_acc, 0)); y_train_loss.append(round(train_loss,3))
+      y_train_acc.append(round(train_acc, 0)); y_train_loss.append(round(train_loss, 3))
       y_valid_acc.append(round(valid_acc, 0)); y_valid_loss.append(round(valid_loss, 3))
       y_test_acc.append(round(test_acc, 0)); y_test_loss.append(round(test_loss, 3))
 
@@ -182,6 +182,7 @@ def main():
 
    #----------------------------------Accuracy/Loss Graphs----------------------------------#
    
+   plot_graphs_csv(x_epochs, y_train_acc, ['Train Accuracy'])
    plot_graphs_csv(x_epochs, y_train_loss, ['Train Loss'])
    plot_graphs_csv(x_epochs, y_valid_acc, ['Validate Accuracy'])
    plot_graphs_csv(x_epochs, y_valid_loss, ['Validate Loss'])
@@ -189,16 +190,17 @@ def main():
    plot_graphs_csv(x_epochs, y_test_loss, ['Test Loss'])
 
    #-----------------------------------Testing the Network-----------------------------------#
-
-  #  model.load_state_dict(torch.load('resnet18-model.pt')) #, map_location=torch.device('cpu')))
-  #  model.load_state_dict(torch.load('vgg-model.pt'))
+   # model.load_state_dict(torch.load('alexnet-model.pt'))
+   # model.load_state_dict(torch.load('vgg-model.pt'))
+   # model.load_state_dict(torch.load('resnet18-model.pt'))
    model.load_state_dict(torch.load('resnext50-model.pt'))
+
    _, _ = evaluate(model, device, test_loader, 0)
 
    #---------------------------------Examination of Results----------------------------------#
 
    get_predictions(model, test_loader, device)
-   images, labels, probs = get_predictions(model, test_loader, device)
+   _, labels, probs = get_predictions(model, test_loader, device)
    predicted_labels = torch.argmax(probs, 1)
 
    plot_confusion_matrix(labels, predicted_labels, species)
