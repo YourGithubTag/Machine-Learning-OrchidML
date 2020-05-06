@@ -59,26 +59,13 @@ def evaluate(model, device, evaluate_loader, valid):
    return loss, (100. * accuracy / len(evaluate_loader.dataset)) # returns loss and accuracy in %.
    
 def jobSetup():
-   
-
-#--------------------------------------Main Function--------------------------------------#
-
-def main():
-   epochs = 10
-   best_valid_loss = float('inf')
-   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-   # accuracy and loss graphing
-   x_epochs = list(range(1, epochs+1))
-   y_train_loss = []
-   y_valid_acc = []; y_valid_loss = []
-   y_test_acc = []; y_test_loss = []
-
 
    a = True
    b = True
    c = True
    d = True
+   e = True
+   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
    while (a):
       collab = input("On google collab?")
@@ -88,12 +75,12 @@ def main():
          a = True
 
       if (collab == 'y'):
-         running_on_google_colab = True
+         google_colab = True
          a = False
          print ("collab on")
 
       if (collab == 'n'):
-         running_on_google_colab = False
+         google_colab = False
          a = False
          print ("collab off")
 
@@ -136,26 +123,54 @@ def main():
       if (modeltype == 'a'):
          model = Inception3().to(device)
          modeldict = 'inceptionv3-model.pt'
+         optimizer = optim.Adam(model.parameters(), lr=0.001)
          d = False
          print ("Inception3: chosen")
 
       elif (modeltype == 'b'):
          model = Inception3().to(device)
          modeldict = 'inceptionv3-model.pt'
+         optimizer = optim.Adam(model.parameters(), lr=0.001)
          d = False
          print ("Inception3: chosen")
 
       elif (modeltype == 'c'):
          model = resnext50_32x4d().to(device)
          modeldict = 'ResNext-model.pt'
+         optimizer = optim.Adam(model.parameters(), lr=0.001)
          d = False
          print ("ResNext: chosen")
 
       elif (modeltype == 'd'):
          model = Inception3().to(device)
          modeldict = 'inceptionv3-model.pt'
+         optimizer = optim.Adam(model.parameters(), lr=0.001)
          d = False
          print ("Inception3: chosen")
+
+   while (e):
+      epoch = input("Number of Epochs: ")
+      try:
+         val = int(epoch)
+         print(f'\nEpochs chosen: {epoch}')
+         e = False
+      except ValueError:
+         print ("Please input a valid model input")
+         e = True
+
+   return google_colab, imagesplot, sessiontype,model, modeldict, optimizer, val, device
+
+#--------------------------------------Main Function--------------------------------------#
+
+def main():
+   running_on_google_colab, imagesplot, sessiontype, model, modeldict, optimizer, epochs, device  = jobSetup()
+   best_valid_loss = float('inf')
+
+   # accuracy and loss graphing
+   x_epochs = list(range(1, epochs+1))
+   y_train_loss = []
+   y_valid_acc = []; y_valid_loss = []
+   y_test_acc = []; y_test_loss = []
 
    #-----------------------------------Dataset Download-----------------------------------#
 
@@ -179,32 +194,32 @@ def main():
       print('Files have been downloaded.')
 
    #-----------------------------------Data Preparation-----------------------------------#
-   
    train_transform = transforms.Compose([
-                              transforms.RandomChoice([
-                                 transforms.RandomHorizontalFlip(p=0.5),
-                                 transforms.RandomVerticalFlip(p=0.5),
-                                 transforms.RandomRotation(180),
-                                 ]),
-                              transforms.Resize(256),
-                              transforms.CenterCrop(227),
-                              transforms.ToTensor()
-                     ])
+                                 transforms.RandomChoice([
+                                    transforms.RandomHorizontalFlip(p=0.5),
+                                    transforms.RandomVerticalFlip(p=0.5),
+                                    transforms.RandomRotation(180),
+                                    ]),
+                                 transforms.Resize(256),
+                                 transforms.CenterCrop(227),
+                                 transforms.ToTensor()
+                        ])
 
    validate_test_transform = transforms.Compose([
                                        transforms.Resize(256),
                                        transforms.CenterCrop(227),
                                        transforms.ToTensor()
                               ])
+   
+   if (sessiontype == 'a' or sessiontype == 'b'):
+      #Defining the Dataloaders using Datasets.     # 136.
+      train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)  # 1,088.
+      validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=32,shuffle=True)    
+      # Prepares and Loads Training, Validation and Testing Data.
+      train_data = datasets.ImageFolder(extract_to+'/train', transform=train_transform)
+      validate_data = datasets.ImageFolder(extract_to+'/valid', transform=validate_test_transform)
 
-   # Prepares and Loads Training, Validation and Testing Data.
-   train_data = datasets.ImageFolder(extract_to+'/train', transform=train_transform)
-   validate_data = datasets.ImageFolder(extract_to+'/valid', transform=validate_test_transform)
    test_data = datasets.ImageFolder(extract_to+'/test', transform=validate_test_transform)
-
-   # Defining the Dataloaders using Datasets.
-   train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)  # 1,088.
-   validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=32,shuffle=True)         # 136.
    test_loader = torch.utils.data.DataLoader(test_data, batch_size=32, shuffle=True)                 # 136.
 
    # Compile labels into a list from JSON file.
@@ -214,10 +229,6 @@ def main():
    species = []
    for label in cat_to_name:
       species.append(cat_to_name[label])
-   
-
-
-
    #---------------------------------Plots Training Images---------------------------------#
    if (imagesplot):
       N_IMAGES = 25
@@ -229,7 +240,6 @@ def main():
 
    #---------------------------------Setting up the Network---------------------------------#
    
-   optimizer = optim.Adam(model.parameters(), lr=0.001)
    
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
@@ -237,6 +247,8 @@ def main():
    print(f'Number of testing samples: {len(test_data)}')
 
    #----------------------------------Training the Network----------------------------------#
+   sessionplotting = False
+
    if (sessiontype == 'a'):
       for epoch in range(1, epochs+1):
          train_loss = train(model, device, train_loader, validate_loader, optimizer, epoch)
@@ -251,6 +263,7 @@ def main():
             best_valid_loss = valid_loss
             torch.save(model.state_dict(), modeldict)
             print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
+      sessionplotting = True
       sessiontype = 'c'
 
    elif (sessiontype == 'b'): 
@@ -268,12 +281,14 @@ def main():
             best_valid_loss = valid_loss
             torch.save(model.state_dict(), modeldict)
             print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
+      sessionplotting = True
       sessiontype = 'c'
 
    if (sessiontype == 'c'):
       model.load_state_dict(torch.load(modeldict))
       _, _ = evaluate(model, device, test_loader, 0)
 
+   if (sessionplotting):
       plot_graphs_csv(x_epochs, y_train_loss, ['Train Loss'])
       plot_graphs_csv(x_epochs, y_valid_acc, ['Validate Accuracy'])
       plot_graphs_csv(x_epochs, y_valid_loss, ['Validate Loss'])
