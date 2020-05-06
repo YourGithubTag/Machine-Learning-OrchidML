@@ -10,8 +10,10 @@ import torch.optim as optim
 import torchvision
 from torchvision import datasets, transforms
 
-from models.alexnet import AlexNet
-from models.vgg import *
+# from models.alexnet import AlexNet
+# from models.resnet import ResNet18
+# from models.vgg import *
+from models.resnext import ResNext50
 from helpers.helpers import *
 from helpers.examination import *
 
@@ -67,7 +69,7 @@ def evaluate(model, device, evaluate_loader, valid):
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
-   epochs = 10
+   epochs = 300
    best_valid_loss = float('inf')
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
    # accuracy and loss graphing
@@ -78,8 +80,8 @@ def main():
 
    #-----------------------------------Dataset Download-----------------------------------#
 
-   running_on_google_colab = False
-   files_downloaded = True
+   running_on_google_colab = True
+   files_downloaded = False
 
    if running_on_google_colab:
       file_path = '/content/17Flowers.zip'
@@ -122,7 +124,7 @@ def main():
    test_data = datasets.ImageFolder(extract_to+'/test', transform=validate_test_transform)
 
    # Defining the Dataloaders using Datasets.
-   train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True)  # 1,088.
+   train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)  # 1,088.
    validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=136)         # 136 AlexNet
    test_loader = torch.utils.data.DataLoader(test_data, batch_size=136)                 
 
@@ -144,9 +146,10 @@ def main():
 
    #---------------------------------Setting up the Network---------------------------------#
    
-   #  model = AlexNet().to(device)
-   model = VGG16().to(device)
-   # optimizer = optim.Adam(model.parameters(), lr=0.001)
+  #  model = AlexNet().to(device)
+  #  model = ResNet18().to(device)
+  #  model = VGG16().to(device)
+   model = ResNext50().to(device)
    optimizer = optim.SGD(model.parameters(), lr=0.001)
 
    print(f'Device selected: {str(device).upper()}')
@@ -168,7 +171,9 @@ def main():
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
         #  torch.save(model.state_dict(), 'alexnet-model.pt')
-         torch.save(model.state_dict(), 'vgg-model.pt')
+        #  torch.save(model.state_dict(), 'resnet18-model.pt')
+        #  torch.save(model.state_dict(), 'vgg-model.pt')
+         torch.save(model.state_dict(), 'resnext50-model.pt')
          print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
 
    #----------------------------------Accuracy/Loss Graphs----------------------------------#
@@ -181,9 +186,9 @@ def main():
 
    #-----------------------------------Testing the Network-----------------------------------#
 
-   #  model.load_state_dict(torch.load('alexnet-model.pt'))
-   model.load_state_dict(torch.load('vgg-model.pt'))
-   
+  #  model.load_state_dict(torch.load('resnet18-model.pt')) #, map_location=torch.device('cpu')))
+  #  model.load_state_dict(torch.load('vgg-model.pt'))
+   model.load_state_dict(torch.load('resnext50-model.pt'))
    _, _ = evaluate(model, device, test_loader, 0)
 
    #---------------------------------Examination of Results----------------------------------#
