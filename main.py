@@ -23,22 +23,26 @@ from helpers.examination import *
 def train(model, device, train_loader, validate_loader, optimizer, epoch):
    model.train()
    loss_value = 0
+   acc_value = 0
    for index, (inputs, labels) in enumerate(train_loader):
       # inputs = batch of samples (64) || index = batch index (1)
       inputs, labels = inputs.to(device), labels.to(device)
       optimizer.zero_grad()
       output = model(inputs)
       loss = F.cross_entropy(output, labels)
-      loss_value += loss.item()
+      accuracy = calculate_accuracy(output, labels)
       loss.backward()
       optimizer.step()
 
+      loss_value += loss.item()
+      acc_value += accuracy.item()
+
       if index == 16:
-        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}'.format(
+        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}\tAccuracy: {:.2f}'.format(
           epoch, index*len(inputs), len(train_loader.dataset), 
-          100. * index / len(train_loader), loss_value / len(train_loader)))
+          100. * index / len(train_loader), loss_value / len(train_loader), acc_value / len(train_loader)))
         
-   return (loss_value / len(train_loader))
+   return (loss_value / len(train_loader)), (acc_value / len(train_loader))
         
 
 def evaluate(model, device, evaluate_loader, valid):
@@ -74,7 +78,7 @@ def main():
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
    # accuracy and loss graphing
    x_epochs = list(range(1, epochs+1))
-   y_train_loss = []
+   y_train_acc = []; y_train_loss = []
    y_valid_acc = []; y_valid_loss = []
    y_test_acc = []; y_test_loss = []
 
@@ -160,11 +164,11 @@ def main():
    #----------------------------------Training the Network----------------------------------#
   
    for epoch in range(1, epochs+1):
-      train_loss = train(model, device, train_loader, validate_loader, optimizer, epoch)
+      train_loss, train_acc = train(model, device, train_loader, validate_loader, optimizer, epoch)
       valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
       test_loss, test_acc = evaluate(model, device, test_loader, 0)
       
-      y_train_loss.append(round(train_loss,3))
+      y_train_acc.append(round(train_acc, 0)); y_train_loss.append(round(train_loss,3))
       y_valid_acc.append(round(valid_acc, 0)); y_valid_loss.append(round(valid_loss, 3))
       y_test_acc.append(round(test_acc, 0)); y_test_loss.append(round(test_loss, 3))
 
