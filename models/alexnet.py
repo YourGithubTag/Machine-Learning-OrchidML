@@ -20,22 +20,28 @@ class AlexNet(nn.Module):
       super(AlexNet, self).__init__()
       # Section 3.5 - Overall Architecture (Convolutional Layers + Max Pooling)
       self.features = nn.Sequential(
+         # Conv. Layer 1
          nn.Conv2d(in_channels=3, out_channels=96, kernel_size=11, stride=4),
          nn.ReLU(),
          # Section 3.3 - Local Response Normalization
          nn.LocalResponseNorm(size=5, alpha=0.0001, beta=0.75, k=2),           
          nn.MaxPool2d(kernel_size=3, stride=2), 
+
+         # Conv. Layer 2
          nn.Conv2d(96, 256, 5, padding=2),  
          nn.ReLU(),
-
          nn.LocalResponseNorm(5, 0.0001, 0.75, 2),
          nn.MaxPool2d(3, 2),
+
+         # Conv. Layer 3
          nn.Conv2d(256, 384, 3, padding=1),  
          nn.ReLU(),
 
+         # Conv. Layer 4
          nn.Conv2d(384, 384, 3, padding=1),  
          nn.ReLU(),
 
+         # Conv. Layer 5
          nn.Conv2d(384, 256, 3, padding=1), 
          nn.ReLU(),
 
