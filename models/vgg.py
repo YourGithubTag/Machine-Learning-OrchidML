@@ -1,9 +1,16 @@
-# The VGG-16 implementation below is identical to the published paper with minor tweaks.
-# All layers and parameters used have been referenced to their appropriate sections of the report.
-# Weight initialisation has been adapted from PyTorch.
-# Note: Identical layers have not been commented due to similarities with other comments.
+'''
 
-# Link: https://arxiv.org/pdf/1409.1556.pdf
+DISCLAIMER: ALL CODE IS WRITTEN FROM SCRATCH AND MAY CONTAIN SIMILARITIES TO CODE FOUND ONLINE.
+            APPROPRIATE ACKNOWLEDGEMENTS HAVE BEEN MADE WHERE NECESSARY.
+
+The VGG-16 implementation below is identical to the published paper with minor tweaks.
+All layers and parameters used have been referenced to their appropriate sections of the report.
+Weight initialisation has been adapted from PyTorch.
+Note: Identical layers have not been commented due to similarities with other comments.
+
+Link: https://arxiv.org/pdf/1409.1556.pdf
+
+'''
 
 import torch
 import torch.nn as nn

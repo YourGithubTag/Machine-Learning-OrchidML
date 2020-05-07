@@ -1,8 +1,15 @@
-# The AlexNet implementation below is identical to the published paper.
-# All layers and parameters used have been referenced to their appropriate sections of the report.
-# Note: Identical layers have not been commented due to similarities with other comments.
+'''
 
-# Link: https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
+DISCLAIMER: ALL CODE IS WRITTEN FROM SCRATCH AND MAY CONTAIN SIMILARITIES TO CODE FOUND ONLINE.
+            APPROPRIATE ACKNOWLEDGEMENTS HAVE BEEN MADE WHERE NECESSARY.
+
+The AlexNet implementation below is identical to the published paper.
+All layers and parameters used have been referenced to their appropriate sections of the report.
+Note: Identical layers have not been commented due to similarities with other comments.
+
+Link: https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
+
+'''
 
 import torch
 import torch.nn as nn
