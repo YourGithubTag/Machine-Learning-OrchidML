@@ -9,6 +9,9 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
 from model.inception import Inception3
+from model.vgg import VGG16
+from model.resnet import ResNet18
+from model.alexnet import AlexNet
 from model.ResNext import resnext50_32x4d
 from helpers.helpers import *
 from helpers.examination import *
@@ -28,15 +31,17 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
       accuracy = calculate_accuracy(output, labels)
       loss.backward()
       optimizer.step()
-
       loss_value += loss.item()
       acc_value += accuracy.item()
-
       if index == 16:
         print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}\tAccuracy: {:.2f}'.format(
           epoch, index*len(inputs), len(train_loader.dataset), 
           100. * index / len(train_loader), loss_value / len(train_loader), acc_value / len(train_loader) * 100))
-        
+   del inputs
+   del labels
+   del output
+   torch.cuda.empty_cache()
+   torch.cuda.ipc_collect() 
    return (loss_value / len(train_loader)), (acc_value / len(train_loader) * 100)
 
 def evaluate(model, device, evaluate_loader, valid):
@@ -51,7 +56,6 @@ def evaluate(model, device, evaluate_loader, valid):
          pred = output.argmax(dim=1, keepdim=True)  # index of the max log-probability
          accuracy += pred.eq(labels.view_as(pred)).sum().item()
 
-
    loss /= len(evaluate_loader.dataset)
 
    if valid:
@@ -62,7 +66,11 @@ def evaluate(model, device, evaluate_loader, valid):
    print('\n{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
          word, loss, accuracy, len(evaluate_loader.dataset),
          100. * accuracy / len(evaluate_loader.dataset)))
-
+   del inputs
+   del labels
+   del output
+   torch.cuda.empty_cache()
+   torch.cuda.ipc_collect()
    return loss, (100. * accuracy / len(evaluate_loader.dataset)) # returns loss and accuracy in %.
 
 class jobclass():
@@ -79,7 +87,15 @@ class jobclass():
     self.testbatch = testbatch
     self.modelname = modelname
 
+def typeface():
+   print(" ██████  ██████   ██████ ██   ██ ██ ██████  ███    ███ ██      ")
+   print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ████  ████ ██      ")
+   print("██    ██ ██████  ██      ███████ ██ ██   ██ ██ ████ ██ ██      ")
+   print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ██  ██  ██ ██      ")
+   print(" ██████  ██   ██  ██████ ██   ██ ██ ██████  ██      ██ ███████ ")
+
 def jobSetup():
+   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
    exit = False
    joblist = []
    while (not exit):
@@ -91,10 +107,10 @@ def jobSetup():
       f = True
       g = True
       h = True
-      device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+      i = True
 
       while (a):
-         collab = input("On google collab?")
+         collab = input(" On google collab?:   ")
 
          if (collab != 'y' and collab != 'n'):
             print ("Please input a valid collab input")
@@ -103,31 +119,64 @@ def jobSetup():
          if (collab == 'y'):
             google_colab = True
             a = False
-            print ("collab on")
+            print ("Collab on")
 
          if (collab == 'n'):
             google_colab = False
             a = False
-            print ("collab off")
+            print ("Collab off")
 
       while (b):
 
-         imagesinput = input("Plot images?")
+         imagesinput = input(" Plot the images?:   ")
          if (imagesinput != 'y' and imagesinput != 'n'):
             print ("Please input a valid plot input")
             b = True
          if (imagesinput == 'y'):
             imagesplot = True
             b = False
-            print ("plot on")
+            print ("Plot on")
 
          if (imagesinput == 'n'):
             imagesplot = False
             b = False
-            print ("plot off")
+            print ("Plot off")
 
+      while (d):
+         modeltype = input(" a.Alexnet \n b.AlexnetVGG  \n c.ResNext  \n d.Resnet18\n   >") 
+         if (modeltype != 'a' and modeltype != 'b' and modeltype != 'c' and modeltype != 'd'):
+            print ("Please input a valid model input")
+            d = True
+
+         if (modeltype == 'a'):
+            model = AlexNet()
+            modeldict = 'Alexnet-model.pt'
+            modelname ="Alexnet"
+            d = False
+
+         elif (modeltype == 'b'):
+            model = VGG16()
+            modeldict = 'VGG-model.pt'
+            modelname ="VGG"
+            d = False
+
+         elif (modeltype == 'c'):
+            model = resnext50_32x4d()
+            modeldict = 'ResNext50-model.pt'
+            modelname ="ResNext50"
+            d = False
+
+         elif (modeltype == 'd'):
+            model = ResNet18()
+            modeldict = 'ResNet18-model.pt'
+            modelname ="ResNet18"
+            d = False
+
+      print (modelname + ": chosen")
+      
+      
       while (c):
-         sessiontype = input("From Stratch: a, Continue learning: b, Testing: c") 
+         sessiontype = input(" a.Start from Stratch \n b.Continue Training \n c.Testing \n   >") 
          if (sessiontype != 'a' and sessiontype != 'b' and sessiontype != 'c'):
             print ("Please input a valid session input")
             c = True
@@ -136,7 +185,7 @@ def jobSetup():
             print ("From Stratch: chosen")
          elif (sessiontype == 'b'):
             c = False
-            print ("Continue learning: chosen")
+            print ("Continue Training: chosen")
          elif (sessiontype == 'c'):
             c = False
             e = False
@@ -145,44 +194,22 @@ def jobSetup():
             epochval = 1
             print ("Testing: chosen")
 
-      while (d):
-         modeltype = input("Alexnet: a, AlexnetVGG: b , ResNext: c, Inception: d") 
-         if (modeltype != 'a' and modeltype != 'b' and modeltype != 'c' and modeltype != 'd'):
+      while (i):
+         optimiseinput = input(" Optimizer: \n a.Adam \n b.SGD  \n   >") 
+         if (optimiseinput != 'a' and optimiseinput != 'b'):
             print ("Please input a valid model input")
-            d = True
-
-         if (modeltype == 'a'):
-            model = Inception3().to(device)
-            modeldict = 'inceptionv3-model.pt'
-            modelname ="Alexnet"
+            i = True
+         if (optimiseinput == 'a'):  
             optimizer = optim.Adam(model.parameters(), lr=0.001)
-            d = False
-
-         elif (modeltype == 'b'):
-            model = Inception3().to(device)
-            modeldict = 'inceptionv3-model.pt'
-            optimizer = optim.Adam(model.parameters(), lr=0.001)
-            modelname ="VGG"
-            d = False
-
-         elif (modeltype == 'c'):
-            model = resnext50_32x4d().to(device)
-            modeldict = 'ResNext-model.pt'
-            optimizer = optim.Adam(model.parameters(), lr=0.001)
-            modelname ="resnet"
-            d = False
-
-         elif (modeltype == 'd'):
-            model = Inception3().to(device)
-            modeldict = 'inceptionv3-model.pt'
-            optimizer = optim.Adam(model.parameters(), lr=0.001)
-            modelname ="Inception"
-            d = False
-
-      print (modelname + ": chosen")
+            print ("Adam chosen")
+            i = False
+         elif (optimiseinput == 'b'):
+            optimizer = optim.SGD(model.parameters(), lr=0.001)
+            print ("SGD chosen")
+            i = False
 
       while (e):
-         epoch = input("Number of Epochs: ")
+         epoch = input(" Number of Epochs:   ")
          try:
             epochval = int(epoch)
             print(f'\nEpochs chosen: {epochval}')
@@ -192,7 +219,7 @@ def jobSetup():
             e = True
 
       while (f):
-         trainbatch = input("Number of train batchs: ")
+         trainbatch = input(" Number of train batchs:   ")
          try:
             valtrain = int(trainbatch)
             print(f'\ntraining batchs chosen: {valtrain}')
@@ -202,7 +229,7 @@ def jobSetup():
             f = True
 
       while (g):
-         testbatch = input("Number of test batchs: ")
+         testbatch = input(" Number of test batchs:   ")
          try:
             valtest = int(testbatch)
             print(f'\ntest batchs chosen: {valtest}')
@@ -215,7 +242,7 @@ def jobSetup():
       joblist.append(job)
 
       while (h):
-         finish = input("would you like to add another job? y/n: ")
+         finish = input(" would you like to add another job? y/n:   ")
          if (finish != 'y' and finish != 'n'):
             print ("Please input a valid plot input")
             h = True
@@ -232,8 +259,11 @@ def jobSetup():
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
+   typeface()
    joblist = jobSetup()
    for x in joblist:
+      model = x.model.to(x.device)
+
       best_valid_loss = float('inf')
 
       # accuracy and loss graphing
@@ -323,9 +353,9 @@ def main():
       if (x.sessiontype == 'a'):
 
          for epoch in range(1, x.epochs+1):
-            train_loss, train_acc = train(x.model, x.device, train_loader, validate_loader, x.optimizer, epoch)
-            valid_loss, valid_acc = evaluate(x.model, x.device, validate_loader, 1)
-            test_loss, test_acc = evaluate(x.model, x.device, test_loader, 0)
+            train_loss, train_acc = train(model, x.device, train_loader, validate_loader, x.optimizer, epoch)
+            valid_loss, valid_acc = evaluate(model, x.device, validate_loader, 1)
+            test_loss, test_acc = evaluate(model, x.device, test_loader, 0)
             
             y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
             y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
@@ -333,19 +363,19 @@ def main():
                   
             if valid_loss < best_valid_loss:
                best_valid_loss = valid_loss
-               torch.save(x.model.state_dict(), x.modeldict)
+               torch.save(model.state_dict(), x.modeldict)
                print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
          sessionplotting = True
          x.sessiontype = 'c'
 
       elif (x.sessiontype == 'b'): 
 
-         x.model.load_state_dict(torch.load(x.modeldict))	
+         model.load_state_dict(torch.load(x.modeldict))	
 
          for epoch in range(1, x.epochs+1):
-            train_loss, train_acc = train(x.model, x.device, train_loader, validate_loader, x.optimizer, epoch)
-            valid_loss, valid_acc = evaluate(x.model, x.device, validate_loader, 1)
-            test_loss, test_acc = evaluate(x.model, x.device, test_loader, 0)
+            train_loss, train_acc = train(model, x.device, train_loader, validate_loader, x.optimizer, epoch)
+            valid_loss, valid_acc = evaluate(model, x.device, validate_loader, 1)
+            test_loss, test_acc = evaluate(model, x.device, test_loader, 0)
             
             y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
             y_valid_acc.append(round(valid_acc, 0)); y_valid_loss.append(round(valid_loss, 3))
@@ -353,15 +383,15 @@ def main():
             
             if valid_loss < best_valid_loss:
                best_valid_loss = valid_loss
-               torch.save(x.model.state_dict(), x.modeldict)
+               torch.save(model.state_dict(), x.modeldict)
                print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
          sessionplotting = True
          x.sessiontype = 'c'
 
       if (x.sessiontype == 'c'):
 
-         x.model.load_state_dict(torch.load(x.modeldict))
-         _, _ = evaluate(x.model, x.device, test_loader, 0)
+         model.load_state_dict(torch.load(x.modeldict))
+         _, _ = evaluate(model, x.device, test_loader, 0)
 
       if (sessionplotting):
          plot_graphs_csv(x_epochs, y_train_acc, ['Train Accuracy'],'Train Accuracy',x.modelname)
@@ -371,13 +401,26 @@ def main():
          plot_graphs_csv(x_epochs, y_test_acc, ['Test Accuracy'],'Test Accuracy',x.modelname)
          plot_graphs_csv(x_epochs, y_test_loss, ['Test Loss'],'Test Loss',x.modelname)
 
-         get_predictions(x.model, test_loader, x.device)
-         images, labels, probs = get_predictions(x.model, test_loader, x.device)
+         get_predictions(model, test_loader, x.device)
+         images, labels, probs = get_predictions(model, test_loader, x.device)
          predicted_labels = torch.argmax(probs, 1)
 
          plot_confusion_matrix(labels, predicted_labels, species, x.modelname)
          class_report(predicted_labels, test_data, 3)
 
+      if (x.sessiontype == 'a' or x.sessiontype == 'b'):
+         del train_data 
+         del validate_data 
+         del train_loader
+         del validate_loader 
+
+      del test_data
+      del test_loader
+      del model
+      del x
+      torch.cuda.empty_cache()
+      torch.cuda.ipc_collect()
+   typeface()
 
 if __name__ == '__main__':
    main()
