@@ -21,6 +21,7 @@ class VGG16(nn.Module):
         super(VGG16, self).__init__()
         # Section 2.2 - Configurations, Table 1 (Convolutional Layers)
         self.features = nn.Sequential(
+            # Conv. Layer 1
             nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             # Added Batch Normalisation to improve accuracy (NOT in official paper)
             nn.BatchNorm2d(64),
@@ -31,6 +32,7 @@ class VGG16(nn.Module):
             # Section 2.1 - Architecture (Max Pooling)
             nn.MaxPool2d(kernel_size=2, stride=2),
 
+            # Conv. Layer 2
             nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.BatchNorm2d(128),
             nn.ReLU(),
@@ -39,6 +41,7 @@ class VGG16(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
+            # Conv. Layer 3
             nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.BatchNorm2d(256),
             nn.ReLU(),
@@ -50,6 +53,7 @@ class VGG16(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
+            # Conv. Layer 4
             nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.BatchNorm2d(512),
             nn.ReLU(),
@@ -61,6 +65,7 @@ class VGG16(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
+            # Conv. Layer 5
             nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.BatchNorm2d(512),
             nn.ReLU(),
@@ -72,6 +77,7 @@ class VGG16(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
         )
+
         # Section A.2 - Localisation Experiments (Average Pooling)
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
 
@@ -86,6 +92,7 @@ class VGG16(nn.Module):
             nn.Linear(4096, 17),
         )
 
+        # Initializes weights.
         self._initialize_weights()
     
     # Forward() links all the layers together
