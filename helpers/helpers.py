@@ -23,13 +23,18 @@ def plot_images(images, labels, normalize = False):
     
     plt.show()
 
-def plot_graphs_csv(x, y, y_label):
+def plot_graphs_csv(x, y, y_label,label,modelname):
+    plt.ioff()
     plt.figure()
     plt.plot(x, y)
     plt.xlabel('Epoch')
-    plt.ylabel(y_label)
+    plt.ylabel(label)
+    figfilename = label + modelname + ".png"
+    csvfilename = modelname + " Results.csv"
+    plt.savefig(figfilename)
+    plt.close()
 
-    with open('Results.csv', 'a+', newline='') as file:
+    with open(csvfilename, 'a+', newline='') as file:
         wr = csv.writer(file)
         wr.writerow(y_label)
         wr.writerow(x)
@@ -39,5 +44,4 @@ def calculate_accuracy(y_pred, y):
     top_pred = y_pred.argmax(1, keepdim = True)
     correct = top_pred.eq(y.view_as(top_pred)).sum()
     acc = correct.float() / y.shape[0]
-    acc = acc * 100
     return acc

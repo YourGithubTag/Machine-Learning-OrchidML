@@ -5,6 +5,7 @@ from sklearn import metrics
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
+
 def get_predictions(model, iterator, device):
     model.eval()
     images = []; labels = []; probs = []
@@ -27,15 +28,17 @@ def get_predictions(model, iterator, device):
     return images, labels, probs
 
 
-def plot_confusion_matrix(labels, pred_labels, classes):
-    
+def plot_confusion_matrix(labels, pred_labels, classes,modelname):
+    plt.ioff()
     fig = plt.figure(figsize = (17, 17))
     ax = fig.add_subplot(1, 1, 1)
     cm = confusion_matrix(labels, pred_labels)
     cm = ConfusionMatrixDisplay(cm, classes)
     cm.plot(values_format = 'd', cmap = 'Greens', ax = ax)
     plt.xticks(rotation = 20)
-    plt.show()
+    figfilename = modelname + "confusion.png"
+    plt.savefig(figfilename)
+    plt.close(fig)
 
 def class_report(pred_labels, data, dp):
 
