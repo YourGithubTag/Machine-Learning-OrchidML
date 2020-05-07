@@ -95,7 +95,7 @@ def main():
       extract_to = '../flower_data'
 
    if not files_downloaded:
-      wget.download('https://dl.dropboxusercontent.com/s/eux59ocorbdii7l/17Flowers.zip')
+      wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
       wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
       shutil.unpack_archive(file_path, extract_to)
       os.remove(file_path)
