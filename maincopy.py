@@ -100,7 +100,6 @@ def jobSetup():
    joblist = []
    while (not exit):
       a = True
-      b = True
       c = True
       d = True
       e = True
@@ -129,23 +128,7 @@ def jobSetup():
             google_colab = False
             a = False
             print ("Collab off")
-
-      while (b):
-
-         imagesinput = input(" Plot the images?:   ")
-         if (imagesinput != 'y' and imagesinput != 'n'):
-            print ("Please input a valid plot input")
-            b = True
-         if (imagesinput == 'y'):
-            imagesplot = True
-            b = False
-            print ("Plot on")
-
-         if (imagesinput == 'n'):
-            imagesplot = False
-            b = False
-            print ("Plot off")
-
+   
       while (d):
          modeltype = input(" a.Alexnet \n b.AlexnetVGG  \n c.ResNext  \n d.Resnet18\n   >") 
          if (modeltype != 'a' and modeltype != 'b' and modeltype != 'c' and modeltype != 'd'):
@@ -251,7 +234,7 @@ def jobSetup():
             print ("Please input a valid model input")
             g = True
       """
-      job = jobclass(google_colab, imagesplot, sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
+      job = jobclass(google_colab, False, sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
       joblist.append(job)
 
       while (h):
@@ -345,14 +328,7 @@ def main():
       species = []
       for label in cat_to_name:
          species.append(cat_to_name[label])
-      #---------------------------------Plots Training Images---------------------------------#
-      if (x.imagesplot):
-         N_IMAGES = 25
-         images, labels = zip(*[(image, label) for image, label in 
-                                    [train_data[i] for i in range(N_IMAGES)]])
-         labels = [test_data.classes[i] for i in labels]
-         plot_images(images, labels, normalize = True)
-      
+   
 
       #---------------------------------Setting up the Network---------------------------------#
       
