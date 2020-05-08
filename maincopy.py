@@ -109,6 +109,11 @@ def jobSetup():
       h = True
       i = True
 
+
+      valtrain = 32
+      valtest = 8
+      optimizer = optim.Adam(model.parameters(), lr=0.001)
+
       while (a):
          collab = input(" On google collab?:   ")
 
@@ -158,6 +163,7 @@ def jobSetup():
             model = VGG16()
             modeldict = 'VGG-model.pt'
             modelname ="VGG"
+            optimizer = optim.SGD(model.parameters(), lr=0.001)
             d = False
 
          elif (modeltype == 'c'):
@@ -174,7 +180,7 @@ def jobSetup():
 
       print (modelname + ": chosen")
       
-      
+
       while (c):
          sessiontype = input(" a.Start from Stratch \n b.Continue Training \n c.Testing \n   >") 
          if (sessiontype != 'a' and sessiontype != 'b' and sessiontype != 'c'):
@@ -194,6 +200,21 @@ def jobSetup():
             epochval = 1
             print ("Testing: chosen")
 
+      while (e):
+         epoch = input(" Number of Epochs:   ")
+         try:
+            epochval = int(epoch)
+            print(f'\nEpochs chosen: {epochval}')
+            e = False
+         except ValueError:
+            print ("Please input a valid model input")
+            e = True
+
+      # This section is DEVELOPER USE ONLY. We do not want the user to change the training or test batch numbers
+      # as this can lead to CUDA out of memory errors.
+
+
+      """
       while (i):
          optimiseinput = input(" Optimizer: \n a.Adam \n b.SGD  \n   >") 
          if (optimiseinput != 'a' and optimiseinput != 'b'):
@@ -207,16 +228,6 @@ def jobSetup():
             optimizer = optim.SGD(model.parameters(), lr=0.001)
             print ("SGD chosen")
             i = False
-
-      while (e):
-         epoch = input(" Number of Epochs:   ")
-         try:
-            epochval = int(epoch)
-            print(f'\nEpochs chosen: {epochval}')
-            e = False
-         except ValueError:
-            print ("Please input a valid model input")
-            e = True
 
       while (f):
          trainbatch = input(" Number of train batchs:   ")
@@ -237,7 +248,7 @@ def jobSetup():
          except ValueError:
             print ("Please input a valid model input")
             g = True
-
+      """
       job = jobclass(google_colab, imagesplot, sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
       joblist.append(job)
 
