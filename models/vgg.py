@@ -19,20 +19,21 @@ class VGG16(nn.Module):
 
     def __init__(self):
         super(VGG16, self).__init__()
-        # Section 2.2 - Configurations, Table 1 (Convolutional Layers)
         self.features = nn.Sequential(
-            # Conv. Layer 1
+            # Conv. Layer 1.
+            # 2D Convolution applied based on Section 2.2 - Configurations, Table 1.
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1),
-            # Added Batch Normalisation to improve accuracy (NOT in official paper)
-            nn.BatchNorm2d(64),
+            # EXTRA: Added Batch Normalisation to improve accuracy (NOT in official paper).
+            nn.BatchNorm2d(num_features=64),
+            # ReLU Activation Function based on Section 2.1 - Architecture.
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 64, 3, 1, 1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            # Section 2.1 - Architecture (Max Pooling)
+            # Max Pooling based on Section 2.1 - Architecture.
             nn.MaxPool2d(kernel_size=2, stride=2),
 
-            # Conv. Layer 2
+            # Conv. Layer 2.
             nn.Conv2d(64, 128, 3, 1, 1),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
@@ -41,7 +42,7 @@ class VGG16(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
 
-            # Conv. Layer 3
+            # Conv. Layer 3.
             nn.Conv2d(128, 256, 3, 1, 1),
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
@@ -53,7 +54,7 @@ class VGG16(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
 
-            # Conv. Layer 4
+            # Conv. Layer 4.
             nn.Conv2d(256, 512, 3, 1, 1),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
@@ -65,7 +66,7 @@ class VGG16(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
 
-            # Conv. Layer 5
+            # Conv. Layer 5.
             nn.Conv2d(512, 512, 3, 1, 1),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
@@ -78,12 +79,14 @@ class VGG16(nn.Module):
             nn.MaxPool2d(2, 2)
         )
 
-        # Section A.2 - Localisation Experiments (Average Pooling)
+        # Average Pooling as per Section A.2 - Localisation Experiments.
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
 
-        # Section 2.3 - Discussions
+        
         self.classifier = nn.Sequential(
+            # Linear transformations based on Section 2.3 - Discussions.
             nn.Linear(512 * 7 * 7, 4096),
+            # ReLU and Dropout based on Section 2.3 - Discussions.
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(4096, 4096),
@@ -103,7 +106,7 @@ class VGG16(nn.Module):
         x = self.classifier(x)
         return x
 
-    # This initializes the weights (hidden layers) based on specifications from the official paper
+    # This initializes the weights (hidden layers) based on specifications from the official paper.
     # Adapted from PyTorch GitHub
     def _initialize_weights(self):
         for m in self.modules():
