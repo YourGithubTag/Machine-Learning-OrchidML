@@ -21,16 +21,16 @@ class VGG16(nn.Module):
         super(VGG16, self).__init__()
         self.features = nn.Sequential(
             # Conv. Layer 1.
-            # 2D Convolution applied based on Section 2.2 - Configurations, Table 1.
+                # 2D Convolution applied based on Section 2.2 - Configurations, Table 1.
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1),
-            # EXTRA: Added Batch Normalisation to improve accuracy (NOT in official paper).
+                # EXTRA: Added Batch Normalisation to improve accuracy (NOT in official paper).
             nn.BatchNorm2d(num_features=64),
-            # ReLU Activation Function based on Section 2.1 - Architecture.
+                # ReLU Activation Function based on Section 2.1 - Architecture.
             nn.ReLU(inplace=True),
             nn.Conv2d(64, 64, 3, 1, 1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            # Max Pooling based on Section 2.1 - Architecture.
+                # Max Pooling based on Section 2.1 - Architecture.
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             # Conv. Layer 2.
