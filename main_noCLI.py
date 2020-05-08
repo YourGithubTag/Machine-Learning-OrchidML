@@ -71,10 +71,11 @@ def evaluate(model, device, evaluate_loader, valid):
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
+   # Model and epoch selection.
    model_sel = 1
    epochs = 300
    
-   # Defaults
+   # Defaults - DO NOT CHANGE.
    train_batch_size = 64
    
    best_valid_loss = float('inf')
