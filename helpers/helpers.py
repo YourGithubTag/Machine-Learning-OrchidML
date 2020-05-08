@@ -3,13 +3,13 @@ import numpy as np
 import csv
 
 
-def plot_graphs_csv(x, y, y_label,label,modelname):
+def plot_graphs_csv(x, y, y_label, label, modelname):
     plt.ioff()
     plt.figure()
     plt.plot(x, y)
     plt.xlabel('Epoch')
     plt.ylabel(label)
-    figfilename = label + modelname + ".png"
+    figfilename = label + "_" + modelname + ".png"
     csvfilename = modelname + " Results.csv"
     plt.savefig(figfilename)
     plt.close()
