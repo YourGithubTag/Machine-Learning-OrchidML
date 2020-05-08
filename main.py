@@ -1,4 +1,3 @@
-# VGG16 SGD 300
 import os
 import json
 import wget
@@ -177,8 +176,6 @@ def main():
    else:
       optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-   lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40, gamma=0.1)
-
    print(f'Device selected: {str(device).upper()}')
    print(f'\nNumber of training samples: {len(train_data)}')
    print(f'Number of validation samples: {len(validate_data)}')
@@ -190,7 +187,6 @@ def main():
       train_loss, train_acc = train(model, device, train_loader, validate_loader, optimizer, epoch)
       valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
       test_loss, test_acc = evaluate(model, device, test_loader, 0)
-      lr_scheduler.step()
 
       y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
       y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
