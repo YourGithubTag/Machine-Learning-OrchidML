@@ -22,7 +22,7 @@ class VGG16(nn.Module):
         # Section 2.2 - Configurations, Table 1 (Convolutional Layers)
         self.features = nn.Sequential(
             # Conv. Layer 1
-            nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1),
             # Added Batch Normalisation to improve accuracy (NOT in official paper)
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
