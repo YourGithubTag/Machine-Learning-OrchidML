@@ -25,18 +25,16 @@ def conv1x1(in_planes, out_planes, stride=1):
 class Bottleneck(nn.Module):
 
         expansion = 4
-        def __init__(self,inplanes, planes, stride=1, downsample=None,groups=1, base_width=64, dilation=1, norm_layer=None):
+        def __init__(self,inplanes, planes, stride=1, downsample=None,groups=1, base_width=64, dilation=1):
             super(Bottleneck, self).__init__()
-            if norm_layer is None:
-                norm_layer = nn.BatchNorm2d
             width = int(planes * (base_width / 64.)) * groups
             # Both self.conv2 and self.downsample layers downsample the input when stride != 1
             self.conv1 = conv1x1(inplanes, width)
-            self.bn1 = norm_layer(width)
+            self.bn1 = nn.BatchNorm2d(width)
             self.conv2 = conv3x3(width, width, stride, groups, dilation)
-            self.bn2 = norm_layer(width)
+            self.bn2 = nn.BatchNorm2d(width)
             self.conv3 = conv1x1(width, planes * self.expansion)
-            self.bn3 = norm_layer(planes * self.expansion)
+            self.bn3 = nn.BatchNorm2d(planes * self.expansion)
             self.relu = nn.ReLU(inplace=True)
             self.downsample = downsample
             self.stride = stride
@@ -69,20 +67,16 @@ class Bottleneck(nn.Module):
 # 
 
 class ResNext(nn.Module):
-    def __init__(self, block,groups,width_per_group,num_classes=1000, zero_init_residual=False,norm_layer=None):
+    def __init__(self, block,groups,width_per_group,num_classes=1000, zero_init_residual=False):
         super(ResNext, self).__init__()
-        if norm_layer is None:
-            norm_layer = nn.BatchNorm2d
-        self._norm_layer = norm_layer
 
         self.inplanes = 64
         
         self.groups = groups
         self.base_width = width_per_group
 
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
-        self.bn1 = norm_layer(self.inplanes)
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,bias=False)
+        self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
@@ -112,81 +106,77 @@ class ResNext(nn.Module):
 
 
     def layer1(self, block, planes, stride=1):
-        norm_layer = self._norm_layer
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
 
-        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1, norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1))
         self.inplanes = planes * block.expansion
 
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
 
         return nn.Sequential(*layers)
 
     def layer2(self, block, planes, stride=1):
-        norm_layer = self._norm_layer
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
-        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1, norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1))
         self.inplanes = planes * block.expansion
 
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
 
         return nn.Sequential(*layers)
 
     def layer3(self, block, planes, stride=1):
-        norm_layer = self._norm_layer
         downsample = None
     
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
         
         layers = []
-        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1, norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1))
         self.inplanes = planes * block.expansion
 
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
 
         return nn.Sequential(*layers)
 
     def layer4(self, block, planes, stride=1):
-        norm_layer = self._norm_layer
         downsample = None
         
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
+                nn.BatchNorm2d(planes * block.expansion),
             )
 
         layers = []
-        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1, norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, stride, downsample, self.groups,self.base_width, 1))
         self.inplanes = planes * block.expansion
 
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
-        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width,norm_layer=norm_layer))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+        layers.append(Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
 
         return nn.Sequential(*layers)
 
