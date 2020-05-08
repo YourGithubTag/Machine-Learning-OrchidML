@@ -14,26 +14,19 @@ def conv1x1(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
- # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
-    # while original implementation places the stride at the first 1x1 convolution(self.conv1)
-    # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
-    # This variant is also known as ResNet V1.5 and improves accuracy according to
-    # https://ngc.nvidia.com/catalog/model-scripts/nvidia:resnet_50_v1_5_for_pytorch.
-
 # This function generates the "bottleneck" block that is used in ResNext. The bottleneck block is the building block which ResNext is built off.
 # It is constructed by taking the input of a base width and planes number and then  
 class Bottleneck(nn.Module):
-
         expansion = 4
         def __init__(self,inplanes, planes, stride=1, down=False ,groups=1, base_width=64):
             super(Bottleneck, self).__init__()
             width = int(planes * (base_width / 64.)) * groups
             # Both self.conv2 and self.downsample layers downsample the input when stride != 1
-            self.conv1 = conv1x1(inplanes, width)
+            self.conv1 = nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
             self.bn1 = nn.BatchNorm2d(width)
-            self.conv2 = conv3x3(width, width, stride, groups)
+            self.conv2 = nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,padding=dilation, groups=groups, bias=False, dilation=dilation)
             self.bn2 = nn.BatchNorm2d(width)
-            self.conv3 = conv1x1(width, planes * self.expansion)
+            self.conv3 = nn.Conv2d(width, planes * self.expansion, kernel_size=1, stride=stride, bias=False)
             self.bn3 = nn.BatchNorm2d(planes * self.expansion)
             self.relu = nn.ReLU(inplace=True)
             self.stride = stride
@@ -74,7 +67,7 @@ class ResNext(nn.Module):
         super(ResNext, self).__init__()
 
         self.inplanes = 64
-        self.planeslist = [64,128,156,512]
+        self.planeslist = [64,128,156,512] #Contains the matrix size for each layer
         self.groups = groups
         self.base_width = width_per_group
 
@@ -83,10 +76,11 @@ class ResNext(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.layer1out = self.layer1(self.planeslist[0])
-        self.layer2out = self.layer2(self.planeslist[1], stride=2,)
-        self.layer3out = self.layer3(self.planeslist[2], stride=2,)
-        self.layer4out = self.layer4(self.planeslist[3], stride=2,)
+        # Constructs the layers, which constains the BottleNecks blocks sequentially 
+        self.layer1out = self.layer1()
+        self.layer2out = self.layer2(stride=2)
+        self.layer3out = self.layer3(stride=2)
+        self.layer4out = self.layer4(stride=2)
         
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * Bottleneck.expansion, num_classes)
@@ -98,46 +92,33 @@ class ResNext(nn.Module):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
-    def layer1(self, planes, stride=1):
-        oldinplanes = self.inplanes
-        self.inplanes = planes * Bottleneck.expansion
-
+    def layer1(self, stride=1):
         return nn.Sequential(
-            Bottleneck(oldinplanes, planes, stride, down=True, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+            Bottleneck(64, self.planeslist[0], stride, down=True, groups=self.groups,base_width=self.base_width),
+            Bottleneck(256,self.planeslist[0], groups=self.groups,base_width=self.base_width),
+            Bottleneck(256,self.planeslist[0], groups=self.groups,base_width=self.base_width))
 
-
-    def layer2(self, planes, stride=1):
-        oldinplanes = self.inplanes
-        self.inplanes = planes * Bottleneck.expansion
-
+    def layer2(self, stride=1):
         return nn.Sequential(
-            Bottleneck(oldinplanes, planes, stride,down=True, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+            Bottleneck(256, self.planeslist[1], stride,down=True, groups=self.groups,base_width=self.base_width),
+            Bottleneck(512, self.planeslist[1], groups=self.groups,base_width=self.base_width),
+            Bottleneck(512, self.planeslist[1], groups=self.groups,base_width=self.base_width),
+            Bottleneck(512, self.planeslist[1], groups=self.groups,base_width=self.base_width))
 
-    def layer3(self, planes, stride=1):
-        oldinplanes = self.inplanes
-        self.inplanes = planes * Bottleneck.expansion
+    def layer3(self, stride=1):
+         return nn.Sequential(
+            Bottleneck(512, self.planeslist[2], stride, down=True, groups=self.groups,base_width=self.base_width),
+            Bottleneck(624, self.planeslist[2], groups=self.groups,base_width=self.base_width),
+            Bottleneck(624, self.planeslist[2], groups=self.groups,base_width=self.base_width),
+            Bottleneck(624, self.planeslist[2], groups=self.groups,base_width=self.base_width),
+            Bottleneck(624, self.planeslist[2], groups=self.groups,base_width=self.base_width),
+            Bottleneck(624, self.planeslist[2], groups=self.groups,base_width=self.base_width))
 
+    def layer4(self, stride=1):
         return nn.Sequential(
-            Bottleneck(oldinplanes, planes, stride, down=True, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
-
-    def layer4(self, planes, stride=1):
-        oldinplanes = self.inplanes
-        self.inplanes = planes * Bottleneck.expansion
-
-        return nn.Sequential(
-            Bottleneck(oldinplanes, planes, stride,down=True, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width),
-            Bottleneck(self.inplanes, planes, groups=self.groups,base_width=self.base_width))
+            Bottleneck(624, self.planeslist[3], stride,down=True, groups=self.groups,base_width=self.base_width),
+            Bottleneck(2048,self.planeslist[3], groups=self.groups,base_width=self.base_width),
+            Bottleneck(2048,self.planeslist[3], groups=self.groups,base_width=self.base_width))
 
     def forward(self, x):
         x = self.conv1(x)
@@ -145,6 +126,7 @@ class ResNext(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
 
+        # Layers sequentially  
         x = self.layer1out(x)
         x = self.layer2out(x)
         x = self.layer3out(x)
@@ -156,11 +138,8 @@ class ResNext(nn.Module):
 
         return x
     
-
 def resnext50_32x4d():
     return ResNext(32 , 4)
-
-
 
 class ResNext50(nn.Module):
     def __init__(self, init_weights=True):
