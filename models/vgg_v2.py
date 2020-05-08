@@ -19,7 +19,6 @@ class VGG_v2(nn.Module):
 
     def __init__(self):
         super(VGG_v2, self).__init__()
-         (Convolutional Layers, Max Pooling)
         self.features = nn.Sequential(
             # Conv. Layer 1
                 # 2D Convolution based on Section 4 - Experiments, Table 1.

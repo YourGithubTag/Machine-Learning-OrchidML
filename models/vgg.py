@@ -81,7 +81,6 @@ class VGG16(nn.Module):
 
         # Average Pooling as per Section A.2 - Localisation Experiments.
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
-
         
         self.classifier = nn.Sequential(
             # Linear transformations based on Section 2.3 - Discussions.
