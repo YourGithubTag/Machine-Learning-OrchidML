@@ -112,7 +112,6 @@ def jobSetup():
 
       valtrain = 32
       valtest = 8
-      optimizer = optim.Adam(model.parameters(), lr=0.001)
 
       while (a):
          collab = input(" On google collab?:   ")
@@ -157,6 +156,7 @@ def jobSetup():
             model = AlexNet()
             modeldict = 'Alexnet-model.pt'
             modelname ="Alexnet"
+            optimizer = optim.Adam(model.parameters(), lr=0.001)
             d = False
 
          elif (modeltype == 'b'):
@@ -170,14 +170,16 @@ def jobSetup():
             model = resnext50_32x4d()
             modeldict = 'ResNext50-model.pt'
             modelname ="ResNext50"
+            optimizer = optim.Adam(model.parameters(), lr=0.001)
             d = False
 
          elif (modeltype == 'd'):
             model = ResNet18()
             modeldict = 'ResNet18-model.pt'
             modelname ="ResNet18"
+            optimizer = optim.Adam(model.parameters(), lr=0.001)
             d = False
-
+      
       print (modelname + ": chosen")
       
 
