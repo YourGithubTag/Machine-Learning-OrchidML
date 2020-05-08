@@ -72,8 +72,8 @@ def evaluate(model, device, evaluate_loader, valid):
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
-   model_sel = 0
-   epochs = 1
+   model_sel = 1
+   epochs = 300
    
    # Defaults
    train_batch_size = 64
@@ -112,8 +112,8 @@ def main():
 
    #-----------------------------------Dataset Download-----------------------------------#
 
-   running_on_google_colab = False
-   files_downloaded = True
+   running_on_google_colab = True
+   files_downloaded = False
 
    if running_on_google_colab:
       file_path = '/content/17Flowers.zip'
@@ -172,7 +172,7 @@ def main():
   
    model = model.to(device)
 
-   if model == 1:
+   if model_sel == 1:
       optimizer = optim.SGD(model.parameters(), lr=0.001)
    else:
       optimizer = optim.Adam(model.parameters(), lr=0.001)
