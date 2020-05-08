@@ -70,7 +70,7 @@ class Bottleneck(nn.Module):
 # 
 
 class ResNext(nn.Module):
-    def __init__(self, block,groups,width_per_group,num_classes=1000, zero_init_residual=False):
+    def __init__(self,groups,width_per_group,num_classes=1000, zero_init_residual=False):
         super(ResNext, self).__init__()
 
         self.inplanes = 64
@@ -158,7 +158,7 @@ class ResNext(nn.Module):
     
 
 def resnext50_32x4d():
-    return ResNext(Bottleneck, 32 , 4)
+    return ResNext(32 , 4)
 
 
 
