@@ -287,7 +287,7 @@ def main():
                                           transforms.ToTensor()
                                  ])
       
-      if (currentjob.sessiontype == 'a' or currentjob.sessiontype == 'b'):
+      if (currentjob.sessiontype == 'a' or currentjob.sessiontype == 'c'):
          # Prepares and Loads Training, Validation and Testing Data.
          train_data = datasets.ImageFolder(extract_to+'/train', transform=train_transform)
          validate_data = datasets.ImageFolder(extract_to+'/valid', transform=validate_test_transform)
