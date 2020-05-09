@@ -64,8 +64,7 @@ def evaluate(model, device, evaluate_loader, valid):
    return loss, (100. * accuracy / len(evaluate_loader.dataset)) # returns loss and accuracy in %.
 
 class jobclass():
-   def __init__(self, google_colab, sessiontype,model, modeldict, optimizer, epochval, device, trainbatch,testbatch,modelname):
-    self.google_colab = google_colab
+   def __init__(self,sessiontype,model, modeldict, optimizer, epochval, device, trainbatch,testbatch,modelname):
     self.sessiontype = sessiontype
     self.model = model
     self.modeldict = modeldict
@@ -88,8 +87,6 @@ def jobSetup():
    exit = False
    joblist = []
    while (not exit):
-
-      CollabBool = True
       SessionTypeBool = True
       ModelTypeBool = True
       EpochBool = True
@@ -101,22 +98,6 @@ def jobSetup():
       valtrain = 32
       valtest = 8
 
-      while (CollabBool):
-         collab = input(" On google collab? y/n:   ")
-
-         if (collab != 'y' and collab != 'n'):
-            print ("Please input a valid collab input")
-            CollabBool = True
-
-         if (collab == 'y'):
-            google_colab = True
-            CollabBool = False
-            print ("Collab on")
-
-         if (collab == 'n'):
-            google_colab = False
-            CollabBool = False
-            print ("Collab off")
    
       while (ModelTypeBool):
          modeltype = input(" a.Alexnet \n b.VGG16  \n c.ResNext  \n d.VGGv2\n   >") 
@@ -222,7 +203,7 @@ def jobSetup():
             print ("Please input a valid batchs input")
             TestBatchBool = True
       """
-      job = jobclass(google_colab, sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
+      job = jobclass(sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
       joblist.append(job)
 
       while (jobBool):
