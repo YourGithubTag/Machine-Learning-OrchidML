@@ -241,7 +241,7 @@ def main():
 
         file_path = './17Flowers.zip'
         extract_to = './flower_data'
-         
+        files_downloaded = False
 
       if not files_downloaded:
          wget.download('https://dl.dropboxusercontent.com/s/itlaky1ssv8590j/17Flowers.zip')
