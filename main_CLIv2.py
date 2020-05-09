@@ -12,7 +12,7 @@ from torch.optim.lr_scheduler import StepLR
 from models.vgg_v2 import VGG_v2
 from model.vgg import VGG16
 from model.alexnet import AlexNet
-from model.ResNext import resnext50_32x4d
+from model.resnext import resnext50_32x4d
 from helpers.helpers import *
 from helpers.examination import *
 
@@ -157,7 +157,7 @@ def jobSetup():
             SessionTypeBool = False
             print ("Testing: chosen")
         """
-        while (EpochBool):
+      while (EpochBool):
          epoch = input(" Number of Epochs:   ")
          try:
             epochval = int(epoch)
@@ -240,9 +240,9 @@ def main():
 
       #-----------------------------------Dataset Download-----------------------------------#
 
-        file_path = './17Flowers.zip'
-        extract_to = './flower_data'
-        files_downloaded = False
+      file_path = './17Flowers.zip'
+      extract_to = './flower_data'
+      files_downloaded = False
 
       if not files_downloaded:
          wget.download('https://dl.dropboxusercontent.com/s/itlaky1ssv8590j/17Flowers.zip')
