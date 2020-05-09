@@ -28,8 +28,8 @@ class Bottleneck(nn.Module):
                 nn.Conv2d(width, width, kernel_size=3, stride=stride,padding=1, groups=groups, bias=False), 
                 nn.BatchNorm2d(width),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(width, self.expandedplane, kernel_size=1, bias=False),
-                nn.BatchNorm2d(self.expandedplane))
+                nn.Conv2d(width, self.expandedplanes, kernel_size=1, bias=False),
+                nn.BatchNorm2d(self.expandedplanes))
 
             self.relu = nn.ReLU(inplace=True)
             self.stride = stride
@@ -38,8 +38,8 @@ class Bottleneck(nn.Module):
             # This is the downsampling function, which allows the input to be added to the output when the input does not 
             # match the output
             self.downsampling  = nn.Sequential(
-                nn.Conv2d(inplanes, planes * Bottleneck.expansion, kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(planes * Bottleneck.expansion))
+                nn.Conv2d(inplanes, self.expandedplanes, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(self.expandedplanes))
 
         def forward(self, x):
             identity = x
