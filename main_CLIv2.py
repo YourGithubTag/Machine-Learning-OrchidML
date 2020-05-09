@@ -140,7 +140,7 @@ def jobSetup():
 
          elif (modeltype == 'c'):
             model = resnext50_32x4d()
-            modeldict = 'ResNext50-modelTEST.pt'
+            modeldict = 'ResNext50-model.pt'
             modelname ="ResNext50"
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
@@ -357,7 +357,7 @@ def main():
                torch.save(model.state_dict(), currentjob.modeldict)
                print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
          sessionplotting = True
-         currentjob.sessiontype = 'c'
+         currentjob.sessiontype = 'b'
 
       # testing the model
       if (currentjob.sessiontype == 'b'):
