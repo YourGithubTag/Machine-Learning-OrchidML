@@ -1,7 +1,18 @@
+'''
+
+DISCLAIMER: ALL CODE IS WRITTEN FROM SCRATCH AND MAY CONTAIN SIMILARITIES TO CODE FOUND ONLINE.
+            APPROPRIATE ACKNOWLEDGEMENTS HAVE BEEN MADE WHERE NECESSARY.
+
+This model is ResNext-50 (32x4d) and is identical to that in the published paper.
+All layers and parameters used have been referenced to their appropriate sections of the report.
+
+Link: https://arxiv.org/pdf/1512.03385.pdf
+
+'''
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 
 # This function generates the "bottleneck" block that is used in ResNext. The bottleneck block is the building block which ResNext as described in papers such as 
 # [Deep Residual Learning for Image Recognition. 10 Dec 2015, Kaiming He, et al]
