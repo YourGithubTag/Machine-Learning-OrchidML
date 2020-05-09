@@ -16,14 +16,16 @@ from models.resnext import resnext50_32x4d
 from helpers.helpers import *
 from helpers.examination import *
 
+
 #-----------------------------------Network Functions-----------------------------------#
 
 def train(model, device, train_loader, validate_loader, optimizer, epoch):
    model.train()
    loss_value = 0
    acc_value = 0
+   
+   # Trains images from every batch depending on batch size. Calculates loss, accuracy and gradients.
    for index, (inputs, labels) in enumerate(train_loader):
-      # inputs = batch of samples (64) || index = batch index (1)
       inputs, labels = inputs.to(device), labels.to(device)
       optimizer.zero_grad()
       output = model(inputs)
@@ -32,29 +34,30 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
       loss.backward()
       optimizer.step()
 
+      # Sums loss and accuracy for visual results.
       loss_value += loss.item()
       acc_value += accuracy.item()
 
-      if index == 16:
-        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}\tAccuracy: {:.2f}%'.format(
-          epoch, index*len(inputs), len(train_loader.dataset), 
-          100. * index / len(train_loader), loss_value / len(train_loader), acc_value / len(train_loader) * 100))
+      print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage Loss: {:.4f}\tAccuracy: {:.2f}%'.format(
+            epoch, index*len(inputs), len(train_loader.dataset), 100. * index / len(train_loader),
+            loss_value / len(train_loader), acc_value / len(train_loader) * 100))
         
-   return (loss_value / len(train_loader)), (acc_value / len(train_loader) * 100)
-        
+   return (loss_value / len(train_loader)), (acc_value / len(train_loader) * 100)       
 
 def evaluate(model, device, evaluate_loader, valid):
    model.eval()
    loss = 0
    accuracy = 0
+
+   # Evaluates images from every batch depending on batch size. Turns off gradient for evaluation purposes.
+   # Calculates the loss and accuracy based on evaluation dataset.
    with torch.no_grad():
       for inputs, labels in evaluate_loader:
          inputs, labels = inputs.to(device), labels.to(device)
          output = model.forward(inputs)
-         loss += F.cross_entropy(output, labels, reduction='sum').item()  # loss is summed before adding to loss
-         pred = output.argmax(dim=1, keepdim=True)  # index of the max log-probability
+         loss += F.cross_entropy(output, labels, reduction='sum').item()
+         pred = output.argmax(dim=1, keepdim=True) 
          accuracy += pred.eq(labels.view_as(pred)).sum().item()
-
    loss /= len(evaluate_loader.dataset)
 
    if valid:
@@ -72,13 +75,24 @@ def evaluate(model, device, evaluate_loader, valid):
 #--------------------------------------Main Function--------------------------------------#
 
 def main():
+   print(" ██████  ██████   ██████ ██   ██ ██ ██████  ███    ███ ██      ")
+   print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ████  ████ ██      ")
+   print("██    ██ ██████  ██      ███████ ██ ██   ██ ██ ████ ██ ██      ")
+   print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ██  ██  ██ ██      ")
+   print(" ██████  ██   ██  ██████ ██   ██ ██ ██████  ██      ██ ███████ ")
+
    # Model and epoch selection.
-   model_sel = 0
-   epochs = 300
+   print("\nSelect a model you would like to train, e.g. 0, 1, 2 or 3: ")
+   model_sel = int(input(" 0. AlexNet \n 1. VGG-16  \n 2. VGG_v2  \n 3. ResNext-50 \n> "))
+ 
+   while (model_sel != 0 and model_sel != 1 and model_sel != 2 and model_sel != 3):
+      print ("Please input a valid model input.")
+      model_sel = int(input(" 0. AlexNet \n 1. VGG-16  \n 2. VGG_v2  \n 3. ResNext-50 \n> "))
+   
+   epochs = int(input("How many epochs would you like to run? \n> "))
    
    # Defaults - DO NOT CHANGE.
    train_batch_size = 64
-   
    best_valid_loss = float('inf')
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -113,24 +127,14 @@ def main():
 
    #-----------------------------------Dataset Download-----------------------------------#
 
-   running_on_google_colab = True
-   files_downloaded = False
+   file_path = './17Flowers.zip'
+   extract_to = './flower_data'
 
-   if running_on_google_colab:
-      file_path = '/content/17Flowers.zip'
-      extract_to = '/content/flower_data'
-   else:
-      file_path = './17Flowers.zip'
-      extract_to = '../flower_data'
-
-   if not files_downloaded:
-      wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
-      wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
-      shutil.unpack_archive(file_path, extract_to)
-      os.remove(file_path)
-      print('Files have successfully downloaded.')
-   else:
-      print('Files have been downloaded.')
+   wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
+   wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
+   shutil.unpack_archive(file_path, extract_to)
+   os.remove(file_path)
+   print('Files have successfully downloaded.')
 
    #-----------------------------------Data Preparation-----------------------------------#
    
@@ -184,16 +188,18 @@ def main():
    print(f'Number of testing samples: {len(test_data)}')
    
    #----------------------------------Training the Network----------------------------------#
-  
+   
    for epoch in range(1, epochs+1):
       train_loss, train_acc = train(model, device, train_loader, validate_loader, optimizer, epoch)
       valid_loss, valid_acc = evaluate(model, device, validate_loader, 1)
       test_loss, test_acc = evaluate(model, device, test_loader, 0)
 
+      # Saves results from training, validation and testing (accuracy and loss) into respective lists.
       y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
       y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
       y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
 
+      # Saves new version of model based on value of loss from validation.
       if valid_loss < best_valid_loss:
          best_valid_loss = valid_loss
          torch.save(model.state_dict(), model_save)
@@ -215,10 +221,12 @@ def main():
 
    #---------------------------------Examination of Results----------------------------------#
 
+   # Gathers predictions made by the model for use further below.
    get_predictions(model, test_loader, device)
    _, labels, probs = get_predictions(model, test_loader, device)
    predicted_labels = torch.argmax(probs, 1)
 
+   # Uses data from above to plot confusion matrix, precision rate, recall rate and f1 rate.
    plot_confusion_matrix(labels, predicted_labels, species, model_name)
    class_report(predicted_labels, test_data, 3)
 
