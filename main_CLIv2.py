@@ -7,7 +7,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 from torchvision import datasets, transforms
-from torch.optim.lr_scheduler import StepLR
 
 from models.vgg_v2 import VGG_v2
 from model.vgg import VGG16
@@ -44,6 +43,10 @@ def evaluate(model, device, evaluate_loader, valid):
    model.eval()
    loss = 0
    accuracy = 0
+
+   # Evaluates images from every batch depending on batch size. Turns off gradient for evaluation purposes.
+   # Calculates the loss and accuracy based on evaluation dataset.
+
    with torch.no_grad():
       for inputs, labels in evaluate_loader:
          inputs, labels = inputs.to(device), labels.to(device)
@@ -76,6 +79,7 @@ class jobclass():
     self.testbatch = testbatch
     self.modelname = modelname
 
+
 def typeface():
    print(" ██████  ██████   ██████ ██   ██ ██ ██████  ███    ███ ██      ")
    print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ████  ████ ██      ")
@@ -83,11 +87,15 @@ def typeface():
    print("██    ██ ██   ██ ██      ██   ██ ██ ██   ██ ██  ██  ██ ██      ")
    print(" ██████  ██   ██  ██████ ██   ██ ██ ██████  ██      ██ ███████ ")
 
+
+
+#------------------------------------Job Creation---------------------------------#
 def jobSetup():
    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-   exit = False
+   exit = False # Exit jobsetup Boolean
    joblist = []
    while (not exit):
+      # These booleans control the state of the menu
       SessionTypeBool = True
       ModelTypeBool = True
       EpochBool = True
@@ -96,20 +104,20 @@ def jobSetup():
       TestBatchBool = True
       jobBool = True
 
-      valtrain = 32
-      valtest = 8
 
-   
+      #--------------------------------------Model Selection--------------------------------------#
       while (ModelTypeBool):
          modeltype = input(" a.Alexnet \n b.VGG16  \n c.ResNext  \n d.VGGv2\n   >") 
          if (modeltype != 'a' and modeltype != 'b' and modeltype != 'c' and modeltype != 'd'):
             print ("Please input a valid model input")
-            d = True
+            ModelTypeBool = True
 
          if (modeltype == 'a'):
             model = AlexNet()
             modeldict = 'Alexnet-model.pt'
             modelname ="Alexnet"
+            valtrain = 64
+            valtest = 136
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
 
@@ -117,6 +125,8 @@ def jobSetup():
             model = VGG16()
             modeldict = 'VGG16-model.pt'
             modelname ="VGG16"
+            valtrain = 32
+            valtest = 136
             optimizer = optim.SGD(model.parameters(), lr=0.001)
             ModelTypeBool = False
 
@@ -124,6 +134,8 @@ def jobSetup():
             model = resnext50_32x4d()
             modeldict = 'ResNext50-model.pt'
             modelname ="ResNext50"
+            valtrain = 32
+            valtest = 136
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
 
@@ -131,12 +143,14 @@ def jobSetup():
             model = VGG_v2()
             modeldict = 'VGGv2-model.pt'
             modelname ="VGGv2"
+            valtrain = 64
+            valtest = 136
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
       
       print (modelname + ": chosen")
 
-      
+      #------------------------------------Session Selection--------------------------------------#
       while (SessionTypeBool):
          sessiontype = input(" a.Start Training a new model \n b.Test the model \n   >") 
          if (sessiontype != 'a' and sessiontype != 'b' and sessiontype != 'c'):
@@ -157,6 +171,7 @@ def jobSetup():
             SessionTypeBool = False
             print ("Testing: chosen")
         """
+      #------------------------------------Epoch Selection--------------------------------------#
       while (EpochBool):
          epoch = input(" Number of Epochs:   ")
          try:
@@ -170,6 +185,7 @@ def jobSetup():
       # This section is DEVELOPER USE ONLY. We do not want the user to change the training or test batch numbers
       # as this can lead to CUDA out of memory errors. Uncomment and use at your own risk!
       """
+      #------------------------------------Optimiser Selection---------------------------------#
       while (OptimBool):
          optimiseinput = input(" Optimizer: \n a.Adam \n b.SGD  \n   >") 
          if (optimiseinput != 'a' and optimiseinput != 'b'):
@@ -183,7 +199,7 @@ def jobSetup():
             optimizer = optim.SGD(model.parameters(), lr=0.001)
             print ("SGD chosen")
             OptimBool = False
-
+      #------------------------------------Batch Selection---------------------------------#
       while (TrainBatchBool):
          trainbatch = input(" Number of train batchs:   ")
          try:
@@ -204,6 +220,7 @@ def jobSetup():
             print ("Please input a valid batchs input")
             TestBatchBool = True
       """
+      #------------------------------------Job Menu---------------------------------#
       job = jobclass(sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
       joblist.append(job)
 
@@ -228,7 +245,6 @@ def main():
    typeface() #Intro face
    joblist = jobSetup() # Setting up all jobs to be run
    for currentjob in joblist:
-      model = currentjob.model.to(currentjob.device)
 
       best_valid_loss = float('inf')
 
@@ -245,7 +261,7 @@ def main():
       files_downloaded = False
 
       if not files_downloaded:
-         wget.download('https://dl.dropboxusercontent.com/s/itlaky1ssv8590j/17Flowers.zip')
+         wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
          wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
          shutil.unpack_archive(file_path, extract_to)
          os.remove(file_path)
@@ -273,8 +289,8 @@ def main():
          # Prepares and Loads Training, Validation and Testing Data.
          train_data = datasets.ImageFolder(extract_to+'/train', transform=train_transform)
          validate_data = datasets.ImageFolder(extract_to+'/valid', transform=validate_test_transform)
-         #Defining the Dataloaders using Datasets.     # 136.
-         train_loader = torch.utils.data.DataLoader(train_data, batch_size=currentjob.trainbatch, shuffle=True)  # 1,088.
+         #Defining the Dataloaders using Datasets
+         train_loader = torch.utils.data.DataLoader(train_data, batch_size=currentjob.trainbatch, shuffle=True)
          validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=currentjob.testbatch,shuffle=True)    
 
          print(f'\nNumber of training samples: {len(train_data)}')
@@ -282,7 +298,7 @@ def main():
 
 
       test_data = datasets.ImageFolder(extract_to+'/test', transform=validate_test_transform)
-      test_loader = torch.utils.data.DataLoader(test_data, batch_size=currentjob.testbatch, shuffle=True)                 # 136.
+      test_loader = torch.utils.data.DataLoader(test_data, batch_size=currentjob.testbatch, shuffle=True)
 
       # Compile labels into a list from JSON file.
       with open('cat_to_name.json', 'r') as f:
@@ -293,15 +309,14 @@ def main():
          species.append(cat_to_name[label])
    
 
-      #---------------------------------Setting up the Network---------------------------------#
+      #---------------------------------Setting up the Job-------------------------------------#
       print(f'Device selected: {str(currentjob.device).upper()}')
       print(f'Number of testing samples: {len(test_data)}')
 
-      #----------------------------------Training the Network----------------------------------#
-
+      model = currentjob.model.to(currentjob.device)
       sessionplotting = False # Turns on or off the function call to plot all graphs
-      #
-      # Starting a model from stratch
+
+      #----------------------------------Training the Network----------------------------------#
       if (currentjob.sessiontype == 'a'):
 
          for epoch in range(1, currentjob.epochs+1):
@@ -309,10 +324,12 @@ def main():
             valid_loss, valid_acc = evaluate(model, currentjob.device, validate_loader, 1)
             test_loss, test_acc = evaluate(model, currentjob.device, test_loader, 0)
             
+            # Saves results from training, validation and testing (accuracy and loss) into respective lists.
             y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
             y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
             y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
                   
+            # Saves new version of model based on value of loss from validation.      
             if valid_loss < best_valid_loss:
                best_valid_loss = valid_loss
                torch.save(model.state_dict(), currentjob.modeldict)
@@ -320,7 +337,7 @@ def main():
          sessionplotting = True
          currentjob.sessiontype = 'b'
 
-      # Loading a model from data and contining training
+      #-----------------------------------Continue from Save Training-----------------------------#
       elif (currentjob.sessiontype == 'c'): 
 
          model.load_state_dict(torch.load(currentjob.modeldict))	
@@ -330,10 +347,12 @@ def main():
             valid_loss, valid_acc = evaluate(model, currentjob.device, validate_loader, 1)
             test_loss, test_acc = evaluate(model, currentjob.device, test_loader, 0)
             
+            # Saves results from training, validation and testing (accuracy and loss) into respective lists.
             y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
             y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
             y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
-            
+                  
+            # Saves new version of model based on value of loss from validation.
             if valid_loss < best_valid_loss:
                best_valid_loss = valid_loss
                torch.save(model.state_dict(), currentjob.modeldict)
@@ -341,28 +360,33 @@ def main():
          sessionplotting = True
          currentjob.sessiontype = 'b'
 
-      # testing the model
+      #-----------------------------------Testing the Network-----------------------------------#
       if (currentjob.sessiontype == 'b'):
 
          model.load_state_dict(torch.load(currentjob.modeldict))
          _, _ = evaluate(model, currentjob.device, test_loader, 0)
 
-      # output of the training graphing function calls
+      #---------------------------------Examination of Results----------------------------------#
       if (sessionplotting):
+
+         #Plots all data points collected during training
          plot_graphs_csv(x_epochs, y_train_acc, ['Train Accuracy'],'Train Accuracy',currentjob.modelname)
          plot_graphs_csv(x_epochs, y_train_loss, ['Train Loss'],'Train Loss',currentjob.modelname)
          plot_graphs_csv(x_epochs, y_valid_acc, ['Validate Accuracy'],'Validate Accuracy',currentjob.modelname)
          plot_graphs_csv(x_epochs, y_valid_loss, ['Validate Loss'],'Validate Loss',currentjob.modelname)
          plot_graphs_csv(x_epochs, y_test_acc, ['Test Accuracy'],'Test Accuracy',currentjob.modelname)
          plot_graphs_csv(x_epochs, y_test_loss, ['Test Loss'],'Test Loss',currentjob.modelname)
-
+         
+         # Gathers predictions made by the model for use further below.
          get_predictions(model, test_loader, currentjob.device)
          images, labels, probs = get_predictions(model, test_loader, currentjob.device)
          predicted_labels = torch.argmax(probs, 1)
 
+         # Uses data from above to plot confusion matrix, precision rate, recall rate and f1 rate.
          plot_confusion_matrix(labels, predicted_labels, species, currentjob.modelname)
          class_report(predicted_labels, test_data, 3)
 
+      #---------------------------------Memory Release---------------------------------------#
       #Del section to make sure that memory is released from the GPU or CPU
       if (currentjob.sessiontype == 'a' or currentjob.sessiontype == 'c'):
          del train_data 
@@ -378,7 +402,7 @@ def main():
       torch.cuda.empty_cache()
       torch.cuda.ipc_collect()
 
-   typeface() # exit face
+   typeface() # exit Screen
 
 if __name__ == '__main__':
    main()
