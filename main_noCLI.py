@@ -11,7 +11,8 @@ from torchvision import datasets, transforms
 
 from models.alexnet import AlexNet
 from models.vgg import VGG16
-from models.resnet import ResNet18
+from models.vgg_v2 import VGG_v2
+from models.resnext import resnext50_32x4d
 from helpers.helpers import *
 from helpers.examination import *
 
@@ -72,7 +73,7 @@ def evaluate(model, device, evaluate_loader, valid):
 
 def main():
    # Model and epoch selection.
-   model_sel = 1
+   model_sel = 0
    epochs = 300
    
    # Defaults - DO NOT CHANGE.
@@ -100,15 +101,15 @@ def main():
       model_save = 'VGG16-model.pt'
 
    elif model_sel == 2:
-      model = ResNet18()
-      model_name = "ResNet-18"
-      model_save = 'ResNext18-model.pt'
+      model = VGG_v2()
+      model_name = "VGG_v2"
+      model_save = 'VGG_v2-model.pt'
 
-   # elif model_sel == 3:
-   #    model = ResNext()
-   #    model_name = "ResNext-50"
-   #    model_save = 'ResNext50-model.pt'
-   #    train_batch_size = 16
+   elif model_sel == 3:
+      model = resnext50_32x4d()
+      model_name = "ResNext-50"
+      model_save = 'ResNext50-model.pt'
+      train_batch_size = 32 # OR 16
 
    #-----------------------------------Dataset Download-----------------------------------#
 
