@@ -120,7 +120,7 @@ def jobSetup():
             model = AlexNet()
             modeldict = 'Alexnet-model.pt'
             modelname ="Alexnet"
-            valtrain = 64
+            valtrain = 32
             valtest = 136
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
@@ -147,7 +147,7 @@ def jobSetup():
             model = VGG_v2()
             modeldict = 'VGGv2-model.pt'
             modelname ="VGGv2"
-            valtrain = 64
+            valtrain = 32
             valtest = 136
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             ModelTypeBool = False
