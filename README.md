@@ -40,6 +40,3 @@ the function, this will allow you to access this functionality.
 
 Out of Memory errors can be common if the wrong sizes for batches are given and results can be far less accurate if the wrong optimizer is used. 
 Running the continue training feature without having a PT file inside the containing folder will also lead to an error.
-
-NOTE: PT Files can be downloaded at this link:
-https://drive.google.com/drive/folders/1uZdCUPQlGq4MdXXKovhOU8vPD63Sl3Vh?usp=sharing
