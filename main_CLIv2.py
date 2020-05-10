@@ -108,7 +108,6 @@ def jobSetup():
       TestBatchBool = True
       jobBool = True
 
-
       #--------------------------------------Model Selection--------------------------------------#
       while (ModelTypeBool):
          modeltype = input(" a.Alexnet \n b.VGG16  \n c.ResNext  \n d.VGGv2\n   >") 
@@ -387,8 +386,10 @@ def main():
       del test_loader
       del model
       del currentjob
-      torch.cuda.empty_cache()
-      torch.cuda.ipc_collect()
+
+      if (torch.cuda.is_available()):
+         torch.cuda.empty_cache()
+         torch.cuda.ipc_collect()
 
    typeface() # exit Screen
 
