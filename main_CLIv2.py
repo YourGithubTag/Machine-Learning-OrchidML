@@ -226,7 +226,7 @@ def jobSetup():
             print ("Please input a valid batchs input")
             TestBatchBool = True
       """
-      #------------------------------------Job Menu---------------------------------#
+      #------------------------------------Job Menu---------------------------------------#
       job = jobclass(sessiontype,model, modeldict, optimizer, epochval, device,valtrain,valtest, modelname)
       joblist.append(job)
 
@@ -297,14 +297,14 @@ def main():
          validate_data = datasets.ImageFolder(extract_to+'/valid', transform=validate_test_transform)
          #Defining the Dataloaders using Datasets
          train_loader = torch.utils.data.DataLoader(train_data, batch_size=currentjob.trainbatch, shuffle=True)
-         validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=currentjob.testbatch,shuffle=True)    
+         validate_loader = torch.utils.data.DataLoader(validate_data, batch_size=currentjob.testbatch)    
 
          print(f'\nNumber of training samples: {len(train_data)}')
          print(f'Number of validation samples: {len(validate_data)}')
 
 
       test_data = datasets.ImageFolder(extract_to+'/test', transform=validate_test_transform)
-      test_loader = torch.utils.data.DataLoader(test_data, batch_size=currentjob.testbatch, shuffle=True)
+      test_loader = torch.utils.data.DataLoader(test_data, batch_size=currentjob.testbatch)
 
       # Compile labels into a list from JSON file.
       with open('cat_to_name.json', 'r') as f:
@@ -322,8 +322,12 @@ def main():
       model = currentjob.model.to(currentjob.device)
       sessionplotting = False # Turns on or off the function call to plot all graphs
 
-      #----------------------------------Training the Network----------------------------------#
-      if (currentjob.sessiontype == 'a'):
+      #----------------------------------Training/Testing the Network----------------------------------#
+      if (currentjob.sessiontype == 'a' or currentjob.sessiontype == 'c'):
+         
+         # Continue from Save Training
+         if (currentjob.sessiontype == 'c'):
+            model.load_state_dict(torch.load(currentjob.modeldict))
 
          for epoch in range(1, currentjob.epochs+1):
             train_loss, train_acc = train(model, currentjob.device, train_loader, validate_loader, currentjob.optimizer, epoch)
@@ -336,29 +340,6 @@ def main():
             y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
                   
             # Saves new version of model based on value of loss from validation.      
-            if valid_loss < best_valid_loss:
-               best_valid_loss = valid_loss
-               torch.save(model.state_dict(), currentjob.modeldict)
-               print('Current Best Valid Loss: {:.4f}.\n'.format(best_valid_loss))
-         sessionplotting = True
-         currentjob.sessiontype = 'b'
-
-      #-----------------------------------Continue from Save Training-----------------------------#
-      elif (currentjob.sessiontype == 'c'): 
-
-         model.load_state_dict(torch.load(currentjob.modeldict))	
-
-         for epoch in range(1, currentjob.epochs+1):
-            train_loss, train_acc = train(model, currentjob.device, train_loader, validate_loader, currentjob.optimizer, epoch)
-            valid_loss, valid_acc = evaluate(model, currentjob.device, validate_loader, 1)
-            test_loss, test_acc = evaluate(model, currentjob.device, test_loader, 0)
-            
-            # Saves results from training, validation and testing (accuracy and loss) into respective lists.
-            y_train_acc.append(round(train_acc, 2)); y_train_loss.append(round(train_loss, 3))
-            y_valid_acc.append(round(valid_acc, 2)); y_valid_loss.append(round(valid_loss, 3))
-            y_test_acc.append(round(test_acc, 2)); y_test_loss.append(round(test_loss, 3))
-                  
-            # Saves new version of model based on value of loss from validation.
             if valid_loss < best_valid_loss:
                best_valid_loss = valid_loss
                torch.save(model.state_dict(), currentjob.modeldict)
@@ -393,6 +374,7 @@ def main():
          class_report(predicted_labels, test_data, 3)
 
       #---------------------------------Memory Release---------------------------------------#
+      
       #Del section to make sure that memory is released from the GPU or CPU
       if (currentjob.sessiontype == 'a' or currentjob.sessiontype == 'c'):
          del train_data 
