@@ -152,7 +152,7 @@ def jobSetup():
 
       #------------------------------------Session Selection--------------------------------------#
       while (SessionTypeBool):
-         sessiontype = input(" a.Start Training a new model \n b.Test the model \n c.Continue Training (Debug) \n   >") 
+         sessiontype = input(" a.Start Training a new model \n b.Test the model \n   >") 
          if (sessiontype != 'a' and sessiontype != 'b' and sessiontype != 'c'):
             print ("Please input a valid session input")
             SessionTypeBool = True
