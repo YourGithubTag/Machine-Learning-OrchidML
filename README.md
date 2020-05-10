@@ -1,11 +1,11 @@
 # CS302-Python-2020-Group31
 
 
-#Orchid<sup>ML</sup>
+# Orchid<sup>ML</sup>
 
 Orchid<sup>ML</sup> is a program to train and test Neural Networks on Flower Recognition
 
-###Getting Started:
+### Getting Started:
 Simply run the Main python file, the program interfaces using the Command line, so command line is best
 
 The program will display the OrchidML textand then a list of options for models comes up, you can now start setting up jobs for the program
@@ -23,14 +23,14 @@ menus to create another model to either run or test an existing one.
 To run all the jobs, type n and hit enter to have all the jobs begin to execute sequentially. The program will access and download all the neccesary dataset files from the
 internet and begin to execute all the jobs in the queue.
 
-###Outputs:
+### Outputs:
 All graphs and confusion matrix plots for the training, testing and validation parts of the models are outputted into the same folder that the program is running in.
 The results of the training is also outtputed to a CSV file named ***model name*** Results.csv, which can be used for analysis
 The PT file, which holds the model memory, allowing for testing and continued training(see Advanced features) of the model is also outputted into the folder containg the main file
 The Precision and F-1 scores are outputted to the command-line.
 
 
-###Advanced Features
+### Advanced Features
 
 The OrchidML program has advanced features, such as setting the training batches , testing batches, and optimizers for each model and also continuing to train the model from a 
 saved state. However you must have an understanding of these features before executing them, as we did not intend for the end user to have this ability, however it is useful to have
