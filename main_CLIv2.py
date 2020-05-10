@@ -1,7 +1,7 @@
 import os
 import json
 import shutil
-import wget
+#import wget
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -152,7 +152,7 @@ def jobSetup():
 
       #------------------------------------Session Selection--------------------------------------#
       while (SessionTypeBool):
-         sessiontype = input(" a.Start Training a new model \n b.Test the model \n   >") 
+         sessiontype = input(" a.Start Training a new model \n b.Test the model \n c.Continue Training (Debug) \n   >") 
          if (sessiontype != 'a' and sessiontype != 'b' and sessiontype != 'c'):
             print ("Please input a valid session input")
             SessionTypeBool = True
@@ -162,15 +162,17 @@ def jobSetup():
          elif (sessiontype == 'b'):
             SessionTypeBool = False
             TrainBatchBool = False
+            OptimBool = False
+            EpochBool = False
             valtrain = 1
             epochval = 1
             print ("Testing: chosen") 
         #UNCOMMENT FOR CONTINUE TRAINING OPTION Uncomment and use at your own risk!
-            """
+         """
          elif (sessiontype == 'c'):
             SessionTypeBool = False
             print ("Testing: chosen")
-        """
+         """
       #------------------------------------Epoch Selection--------------------------------------#
       while (EpochBool):
          epoch = input(" Number of Epochs:   ")
@@ -187,7 +189,7 @@ def jobSetup():
       """
       #------------------------------------Optimiser Selection---------------------------------#
       while (OptimBool):
-         optimiseinput = input(" Optimizer: \n a.Adam \n b.SGD  \n   >") 
+         optimiseinput = input(" Optimizer (Debug): \n a.Adam \n b.SGD  \n   >") 
          if (optimiseinput != 'a' and optimiseinput != 'b'):
             print ("Please input a valid Optimizer input")
             OptimBool = True
@@ -201,7 +203,7 @@ def jobSetup():
             OptimBool = False
       #------------------------------------Batch Selection---------------------------------#
       while (TrainBatchBool):
-         trainbatch = input(" Number of train batchs:   ")
+         trainbatch = input(" Number of train batchs (Debug):   ")
          try:
             valtrain = int(trainbatch)
             print(f'\ntraining batchs chosen: {valtrain}')
@@ -211,7 +213,7 @@ def jobSetup():
             TrainBatchBool = True
 
       while (TestBatchBool):
-         testbatch = input(" Number of test batchs:   ")
+         testbatch = input(" Number of test batchs (Debug):   ")
          try:
             valtest = int(testbatch)
             print(f'\ntest batchs chosen: {valtest}')
@@ -259,14 +261,14 @@ def main():
       file_path = './17Flowers.zip'
       extract_to = './flower_data'
       files_downloaded = False
-
+      """
       if not files_downloaded:
          wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
          wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
          shutil.unpack_archive(file_path, extract_to)
          os.remove(file_path)
          print('Files have successfully downloaded.')
-
+      """
       #-----------------------------------Data Preparation-----------------------------------#
       train_transform = transforms.Compose([
                                     transforms.RandomChoice([
@@ -362,7 +364,7 @@ def main():
 
       #-----------------------------------Testing the Network-----------------------------------#
       if (currentjob.sessiontype == 'b'):
-
+         print("TEST RESULTS: " + currentjob.modelname)
          model.load_state_dict(torch.load(currentjob.modeldict))
          _, _ = evaluate(model, currentjob.device, test_loader, 0)
 
