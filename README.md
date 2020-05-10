@@ -1,9 +1,7 @@
-# CS302-Python-2020-Group31
-
-
 # Orchid<sup>ML</sup>
 
-Orchid<sup>ML</sup> is a program to train and test Neural Networks on Flower Recognition
+
+Orchid<sup>ML</sup> is a program to train and test Neural Networks on Flower Recognition designed by Group 31.
 
 ### Getting Started:
 Simply run the Main python file, the program interfaces using the Command line, so command line is best
