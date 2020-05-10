@@ -105,7 +105,7 @@ class VGG16(nn.Module):
         x = self.classifier(x)
         return x
 
-    # This initializes the weights (hidden layers) based on specifications from the official paper.
+    # This initializes the weights based on specifications from the official paper.
     # Adapted from PyTorch GitHub
     def _initialize_weights(self):
         for m in self.modules():
