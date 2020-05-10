@@ -9,9 +9,9 @@ import torchvision
 from torchvision import datasets, transforms
 
 from models.vgg_v2 import VGG_v2
-from model.vgg import VGG16
-from model.alexnet import AlexNet
-from model.resnext import resnext50_32x4d
+from models.vgg import VGG16
+from models.alexnet import AlexNet
+from models.resnext import resnext50_32x4d
 from helpers.helpers import *
 from helpers.examination import *
 
