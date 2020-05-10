@@ -1,7 +1,7 @@
 import os
 import json
 import shutil
-#import wget
+import wget
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -21,6 +21,8 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
    model.train()
    loss_value = 0
    acc_value = 0
+
+    # Trains images from every batch depending on batch size. Calculates loss, accuracy and gradients.
    for index, (inputs, labels) in enumerate(train_loader):
       # inputs = batch of samples (64) || index = batch index (1)
       inputs, labels = inputs.to(device), labels.to(device)
@@ -30,6 +32,8 @@ def train(model, device, train_loader, validate_loader, optimizer, epoch):
       accuracy = calculate_accuracy(output, labels)
       loss.backward()
       optimizer.step()
+
+      # Sums loss and accuracy for visual results.
       loss_value += loss.item()
       acc_value += accuracy.item()
 
@@ -261,14 +265,14 @@ def main():
       file_path = './17Flowers.zip'
       extract_to = './flower_data'
       files_downloaded = False
-      """
+      
       if not files_downloaded:
          wget.download('https://dl.dropboxusercontent.com/s/7sk2z16uvjzot81/17Flowers.zip')
          wget.download('https://dl.dropboxusercontent.com/s/rwc40rv1r79tl18/cat_to_name.json')
          shutil.unpack_archive(file_path, extract_to)
          os.remove(file_path)
          print('Files have successfully downloaded.')
-      """
+      
       #-----------------------------------Data Preparation-----------------------------------#
       train_transform = transforms.Compose([
                                     transforms.RandomChoice([
